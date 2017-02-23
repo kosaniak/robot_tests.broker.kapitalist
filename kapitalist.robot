@@ -3,16 +3,27 @@ Library  Selenium2Screenshots
 Library  Selenium2Library
 Library  String
 Library  DateTime
-Library  kapitalist_service.py
+Resource  kapitalist_service.py
 
 *** Variables ***
-${loginLink}              id=loginLink
-${loginEmailField}        id=Email
-${loginPasswordField}     id=Password
-${submitButton}           xpath=//*[@type="submit"]
-${loginEmail}    test_test@test.com
-${telephone}     +380630000000
-${bid_number}
+${loginLink}                     id=loginLink
+${loginEmailField}               id=Email
+${loginPasswordField}            id=Password
+${submitButton}                  xpath=//*[@type="submit"]
+#${loginEmail}                    qa_test@binka.me
+#${telephone}                     +380630000000
+${createTenderButton}            xpath=//* [text()="Створити закупівлю"]
+#Тип тендеру - Допорогові закупівлі
+${typeOfAdvertisementLink}       xpath=//* [text()="Допорогові закупівлі"]
+${titleOfTenderField}            name="Title"
+${descriptionOfTenderField}      name="Description"
+#${awardCriteria}                name="AwardCriteria"
+${turnOnPdvCheckBox}             id="Value_VATIncluded"
+${questionStartDate}             id="EnquiryPeriod_StartDate_Local"
+${questionEndDate}               id="EnquiryPeriod_EndDate_Local"
+${tenderPeriodStartDate}         id="TenderPeriod_StartDate_Local"
+${tenderPeriodEndDate}           id="TenderPeriod_EndDate_Local"
+${saveButton}                    xpath=//* [@type="submit"]
 
 *** Keywords ***
 Підготувати дані для оголошення тендера
@@ -77,23 +88,25 @@ Login
   ${quantity}=      Get From Dictionary           ${items[0]}                           quantity
   ${name}=          Get From Dictionary   ${prepared_tender_data.procuringEntity.contactPoint}       name
 
-#  Selenium2Library.Switch Browser     ${ARGUMENTS[0]}
-#  Wait Until Page Contains Element    xpath=//*[text()='Нова закупівля']   10
-#  Click Element                       xpath=//*[text()='Нова закупівля']
-#  Sleep  3
-#  Click Element                       xpath=//*[@id="mForm:chooseProcurementTypeBtn"]
-#  Wait Until Page Contains Element    id=mForm:data:name  10
-#  Input text                          id=mForm:data:name     ${title}
-#  Input text                          id=mForm:data:desc     ${description}
+  Selenium2Library.Switch Browser     ${ARGUMENTS[0]}
+  Wait Until Page Contains Element    ${createTenderButton}                               10
+  Click Element                       ${createTenderButton}
+  Sleep  3
+  Click Element                       ${typeOfAdvertisementLink}
+  Wait Until Page Contains Element    ${titleOfTenderField}                              10
+  Input text                          ${titleOfTenderField}                              ${title}
+  Input text                          ${descriptionOfTenderField}                        ${description}
+#  Чел бокс для включення/відключення ПДВ
+  Click Element                       ${turnOnPdvCheckBox}
 #  Input text                          id=mForm:data:budget   ${budget}
 #  Sleep  5
 #  Input text                          id=mForm:data:step     ${step_rate}
-#  Input text                          xpath=//*[@id="mForm:data:dEA_input"]  ${enquiry_period_end_date}
-#  Input text                          xpath=//*[@id="mForm:data:dSPr_input"]  ${tender_period_start_date}
-#  Input text                          xpath=//*[@id="mForm:data:dEPr_input"]  ${tender_period_end_date}
+  Input text                          ${questionEndDate}                                ${enquiry_period_end_date}
+  Input text                          ${tenderPeriodStartDate}                          ${tender_period_start_date}
+  Input text                          ${tenderPeriodEndDate}                            ${tender_period_end_date}
 #  Click Element                       xpath=//*[@id='mForm:data:vat']/tbody/tr/td[1]//span
 #  Click Element                       id=mForm:data:cKind_label
 #  Click Element                       xpath=//div[@id='mForm:data:cKind_panel']//li[3]
 #  Input text                          id=mForm:data:cCpvGr_input      ${cpv_id_1}
 #  Wait Until Page Contains Element    xpath=.//*[@id='mForm:data:cCpvGr_panel']/table/tbody/tr/td[2]/span   10
-#  Click Element                       xpath=.//*[@id='mForm:data:cCpvGr_panel']/table/tbody/tr/td[2]/span
+  Click Element                       ${saveButton}
