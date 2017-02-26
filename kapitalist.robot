@@ -35,6 +35,12 @@ ${lotGuaranteeAmount}            id="Guarantee_Amount"
 ${lotMinimalStepAmount}          id="MinimalStep_Amount"
 ${lotSaveButton}                 xpath=//*[@type="submit"]
 
+# Завантадення документу
+${addDocument}                   xpath=//div/fieldset[2]/a[3]
+${documentDescription}           id="Description"
+${typeOfDocument}
+${languageOfDocument}
+${uploadButton}
 *** Keywords ***
 Підготувати дані для оголошення тендера
   [Arguments]  @{ARGUMENTS}
@@ -107,7 +113,7 @@ Login
   Wait Until Page Contains Element    ${titleOfTenderField}                              10
   Input text                          ${titleOfTenderField}                              ${title}
   Input text                          ${descriptionOfTenderField}                        ${description}
-#  Чек бокс для включення/відключення ПДВ
+#  Чек бокс для включення/відключення ПДВ (при необхідності закоментувати)
   Click Element                       ${turnOnPdvCheckBox}
   Input text                          ${questionEndDate}                                ${enquiry_period_end_date}
   Input text                          ${tenderPeriodStartDate}                          ${tender_period_start_date}
@@ -117,21 +123,16 @@ Login
 
 # Додавання лоту
 Додати предмет
-  [Arguments]   ${item}   ${index}
+  [Arguments]
 
   Wait Until Page Contains Element      ${addLot}
   click element                         ${addLot}
   Input text                            ${lotHeader}                      Test title
-  Input text                            ${lotDescription}                 Test lot description
-  Select From List By Value        id=slw_item_${index}_unit_code         ${item.unit.code}
-  Input text        id=ew_item_${index}_classification_id                 ${item.classification.id}
-  Wait Until Page Contains Element     xpath=(//ul[contains(@class, 'ui-autocomplete') and not(contains(@style,'display: none'))]//li//a)
-  Click Element     xpath=(//ul[contains(@class, 'ui-autocomplete') and not(contains(@style,'display: none'))]//li//a)
-  Input text        id=ew_item_${index}_deliveryAddress_countryName       ${item.deliveryAddress.countryName}
-  Input text        id=ew_item_${index}_deliveryAddress_postalCode        ${item.deliveryAddress.postalCode}
-  Input text        id=ew_item_${index}_deliveryAddress_region            ${item.deliveryAddress.region}
-  Input text        id=ew_item_${index}_deliveryAddress_locality          ${item.deliveryAddress.locality}
-  Input text        id=ew_item_${index}_deliveryAddress_streetAddress     ${item.deliveryAddress.streetAddress}
+  Input text                            ${lotDescription}                 ${descr_lot}
+  Input text                            ${lotValueAmount}                 ${budget}
+  Input text                            ${lotGuaranteeAmount}             ${budget}
+  Input text                            ${lotMinimalStepAmount}           ${step_rate}
+  Click Element                         ${lotSaveButton}
 
 Завантажити документ
   [Arguments]  @{ARGUMENTS}
