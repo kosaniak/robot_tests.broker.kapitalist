@@ -38,16 +38,23 @@ ${lotSaveButton}                 xpath=//*[@type="submit"]
 # Завантадення документу
 ${addDocument}                   xpath=//div/fieldset[2]/a[3]
 ${documentDescription}           id="Description"
-${typeOfDocument}
-${languageOfDocument}
-${uploadButton}
+#${typeOfDocument}
+#${languageOfDocument}
+${uploadButton}                  id="Document"
+
+#Пошук тендеру по идентифікатору
+${byTenderNumber}                xpath=//*[@class="container"]/div[4]/a[2]
+${PrecurementNumber}             id="ProcurementNumber"
+${searchButton}                  id="search"
 *** Keywords ***
+
+#Виконано
 Підготувати дані для оголошення тендера
   [Arguments]  @{ARGUMENTS}
   Log Many  @{ARGUMENTS}
   [return]  ${ARGUMENTS[1]}
 
-
+#Виконано
 Підготувати клієнт для користувача
   [Arguments]  @{ARGUMENTS}
   [Documentation]  Відкрити браузер, створити об’єкт api wrapper, тощо
@@ -57,7 +64,7 @@ ${uploadButton}
   Set Window Position   @{USERS.users['${ARGUMENTS[0]}'].position}
   Run Keyword If   '${ARGUMENTS[0]}' != 'Kapitalist_Viewer'   Вхід   ${ARGUMENTS[0]}
 
-
+#Виконано
 Login
   [Arguments]  ${username}
   Run Keyword And Ignore Error   Wait Until Page Contains Element    ${loginLink}         10
@@ -68,7 +75,7 @@ Login
   Input text                     ${loginPasswordField}               ${USERS.users['${username}'].password}
   Click Button                   ${submitButton}
   Sleep  3
-
+#Виконано
 Змінити користувача
   [Arguments]  @{ARGUMENTS}
   Go to                          ${USERS.users['${ARGUMENTS[0]}'].homepage}
@@ -77,7 +84,7 @@ Login
   Input text                     ${loginPasswordField}               ${USERS.users['${username}'].password}
   Click Button                   ${submitButton}
   Sleep  3
-
+#Виконано
 Створити тендер
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -121,6 +128,7 @@ Login
   Click Element                       ${saveButton}
 #  Створена чернетка допорогового тендеру
 
+#Виконано
 # Додавання лоту
 Додати предмет
   [Arguments]
@@ -134,6 +142,7 @@ Login
   Input text                            ${lotMinimalStepAmount}           ${step_rate}
   Click Element                         ${lotSaveButton}
 
+#Виконано
 Завантажити документ
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -141,57 +150,59 @@ Login
   ...      ${ARGUMENTS[1]} ==  ${filepath}
   ...      ${ARGUMENTS[2]} ==  ${TENDER}
   ueex.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
-  Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element     id=btn_documents_add
-  Choose File       xpath=(//*[@id='upload_form']/input[2])   ${ARGUMENTS[1]}
+  Wait Until Page Contains Element       ${uploadButton}
+  Click Element     ${uploadButton}
+  Choose File       ${uploadButton}         ${ARGUMENTS[1]}
   Sleep   2
-  Click Element     id=upload_button
+  Press Key         ENTER
   Reload Page
-
+#Виконано
 Пошук тендера по ідентифікатору
   [Arguments]  @{ARGUMENTS}
   [Documentation]
   ...      ${ARGUMENTS[0]} ==  username
   ...      ${ARGUMENTS[1]} ==  ${TENDER}
-  Switch Browser    ${ARGUMENTS[0]}
-  Go to   ${USERS.users['${ARGUMENTS[0]}'].default_page}
-  Wait Until Element Contains  id=records_shown      Y
-  Click Element    id=btFilterNumber
-  Wait Until Page Contains Element  id=ew_fv_0_value
-  Input Text      id=ew_fv_0_value   ${ARGUMENTS[1]}
-  Click Element    id=btnFilter
+  Switch Browser                    ${ARGUMENTS[0]}
+  Go to                             ${USERS.users['${ARGUMENTS[0]}'].homepage}
+  Wait Until Element Contains       ${byTenderNumber}                           Y
+  Click Element                     ${byTenderNumber}
+  Wait Until Page Contains Element  ${PrecurementNumber}
+  Input Text                        ${PrecurementNumber}                        ${ARGUMENTS[1]}
+  Click Element                     ${searchButton}
   Sleep  2
-  Wait Until Page Contains Element  id=tw_tr_10_title
-  Click Element     id=tw_tr_10_title
-  sleep  2
-  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
+#  Wait Until Page Contains Element  id=tw_tr_10_title
+#  Click Element     id=tw_tr_10_title
+#  sleep  2
+#  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
 
+#Не виконане програмістами
+#Перейти до сторінки запитань
+#  Wait Until Page Contains Element   id=questions_ref
+#  Click Element     id=questions_ref
+#  Wait Until Element Contains  id=records_shown      Y
 
-Перейти до сторінки запитань
-  Wait Until Page Contains Element   id=questions_ref
-  Click Element     id=questions_ref
-  Wait Until Element Contains  id=records_shown      Y
+#Не виконане програмістами
+#Перейти до сторінки відмін
+#  Wait Until Page Contains Element   id=cancels_ref
+#  Click Element     id=cancels_ref
+#  Wait Until Element Contains  id=records_shown      Y
 
-Перейти до сторінки відмін
-  Wait Until Page Contains Element   id=cancels_ref
-  Click Element     id=cancels_ref
-  Wait Until Element Contains  id=records_shown      Y
-
-Задати питання
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  username
-  ...      ${ARGUMENTS[1]} ==  tenderUaId
-  ...      ${ARGUMENTS[2]} ==  questionId
-  ${title}=        Get From Dictionary  ${ARGUMENTS[2].data}  title
-  ${description}=  Get From Dictionary  ${ARGUMENTS[2].data}  description
-  Wait Until Page Contains Element      xpath=(//*[@id='btn_question' and not(contains(@style,'display: none'))])
-  Click Element     id=btn_question
-  Sleep   3
-  Input text          id=e_title                 ${title}
-  Input text          id=e_description           ${description}
-  Click Element     id=SendQuestion
-  Sleep  3
+#Не виконане програмістами
+#Задати питання
+#  [Arguments]  @{ARGUMENTS}
+#  [Documentation]
+#  ...      ${ARGUMENTS[0]} ==  username
+#  ...      ${ARGUMENTS[1]} ==  tenderUaId
+#  ...      ${ARGUMENTS[2]} ==  questionId
+#  ${title}=        Get From Dictionary  ${ARGUMENTS[2].data}  title
+#  ${description}=  Get From Dictionary  ${ARGUMENTS[2].data}  description
+#  Wait Until Page Contains Element      xpath=(//*[@id='btn_question' and not(contains(@style,'display: none'))])
+#  Click Element     id=btn_question
+#  Sleep   3
+#  Input text          id=e_title                 ${title}
+#  Input text          id=e_description           ${description}
+#  Click Element     id=SendQuestion
+#  Sleep  3
 
 Скасувати закупівлю
   [Arguments]  @{ARGUMENTS}
