@@ -11,14 +11,11 @@ ${loginLink}                     id=loginLink
 ${loginEmailField}               id=Email
 ${loginPasswordField}            id=Password
 ${submitButton}                  xpath=//*[@type="submit"]
-#${loginEmail}                    qa_test@binka.me
-#${telephone}                     +380630000000
 ${createTenderButton}            xpath=//* [text()="Створити закупівлю"]
 #Тип тендеру - Допорогові закупівлі
 ${typeOfAdvertisementLink}       xpath=//* [text()="Допорогові закупівлі"]
 ${titleOfTenderField}            name="Title"
 ${descriptionOfTenderField}      name="Description"
-#${awardCriteria}                name="AwardCriteria"
 ${turnOnPdvCheckBox}             id="Value_VATIncluded"
 ${questionStartDate}             id="EnquiryPeriod_StartDate_Local"
 ${questionEndDate}               id="EnquiryPeriod_EndDate_Local"
@@ -176,33 +173,33 @@ Login
 #  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
 
 #Не виконане програмістами
-#Перейти до сторінки запитань
-#  Wait Until Page Contains Element   id=questions_ref
-#  Click Element     id=questions_ref
-#  Wait Until Element Contains  id=records_shown      Y
+Перейти до сторінки запитань
+  Wait Until Page Contains Element   id=questions_ref
+  Click Element     id=questions_ref
+  Wait Until Element Contains  id=records_shown      Y
 
 #Не виконане програмістами
-#Перейти до сторінки відмін
-#  Wait Until Page Contains Element   id=cancels_ref
-#  Click Element     id=cancels_ref
-#  Wait Until Element Contains  id=records_shown      Y
+Перейти до сторінки відмін
+  Wait Until Page Contains Element   id=cancels_ref
+  Click Element     id=cancels_ref
+  Wait Until Element Contains  id=records_shown      Y
 
 #Не виконане програмістами
-#Задати питання
-#  [Arguments]  @{ARGUMENTS}
-#  [Documentation]
-#  ...      ${ARGUMENTS[0]} ==  username
-#  ...      ${ARGUMENTS[1]} ==  tenderUaId
-#  ...      ${ARGUMENTS[2]} ==  questionId
-#  ${title}=        Get From Dictionary  ${ARGUMENTS[2].data}  title
-#  ${description}=  Get From Dictionary  ${ARGUMENTS[2].data}  description
-#  Wait Until Page Contains Element      xpath=(//*[@id='btn_question' and not(contains(@style,'display: none'))])
-#  Click Element     id=btn_question
-#  Sleep   3
-#  Input text          id=e_title                 ${title}
-#  Input text          id=e_description           ${description}
-#  Click Element     id=SendQuestion
-#  Sleep  3
+Задати питання
+  [Arguments]  @{ARGUMENTS}
+  [Documentation]
+  ...      ${ARGUMENTS[0]} ==  username
+  ...      ${ARGUMENTS[1]} ==  tenderUaId
+  ...      ${ARGUMENTS[2]} ==  questionId
+  ${title}=        Get From Dictionary  ${ARGUMENTS[2].data}  title
+  ${description}=  Get From Dictionary  ${ARGUMENTS[2].data}  description
+  Wait Until Page Contains Element      xpath=(//*[@id='btn_question' and not(contains(@style,'display: none'))])
+  Click Element     id=btn_question
+  Sleep   3
+  Input text          id=e_title                 ${title}
+  Input text          id=e_description           ${description}
+  Click Element     id=SendQuestion
+  Sleep  3
 
 Скасувати закупівлю
   [Arguments]  @{ARGUMENTS}
@@ -212,7 +209,7 @@ Login
   ...      ${ARGUMENTS[2]} = cancellation_reason
   ...      ${ARGUMENTS[3]} = doc_path
   ...      ${ARGUMENTS[4]} = description
-  ueex.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+  kapitalist.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
   Wait Until Page Contains Element   xpath=(//*[@id='btnСancel' and not(contains(@style,'display: none'))])
   Click Element     id=btnСancel
   Sleep   2
