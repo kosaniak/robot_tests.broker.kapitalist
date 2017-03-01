@@ -23,6 +23,9 @@ ${tenderPeriodStartDate}         id="TenderPeriod_StartDate_Local"
 ${tenderPeriodEndDate}           id="TenderPeriod_EndDate_Local"
 ${saveButton}                    xpath=//* [@type="submit"]
 
+#Вхід до кабінету
+${personalCabinetButton}         xpath=//*[@id="logoutForm"]//li/a/span
+
 # Додавання лоту
 ${addLot}                        xpath=//*[contains(a, 'лот')]
 ${lotHeader}                     id="Title"
@@ -31,6 +34,16 @@ ${lotValueAmount}                id="Value_Amount"
 ${lotGuaranteeAmount}            id="Guarantee_Amount"
 ${lotMinimalStepAmount}          id="MinimalStep_Amount"
 ${lotSaveButton}                 xpath=//*[@type="submit"]
+
+# Додавання айтему
+${addItemButton}                 xpath=//fieldset[3]/a[1]
+${CpvCodeList}                   xpath=//*[@id='accordionCPV']/div/div/h4/a
+${addCpvCode}                    id="03121100-6_anchor"
+${unitCode}                      id="Unit_Code"
+${unitName}                      id="Unit_Name"
+${unitQuantity}                  id="Quantity"
+${deliveryDateStartDateLocal}    id="DeliveryDate_StartDate_Local"
+${deliveryDateEndDateLocal}      id="DeliveryDate_EndDate_Local"
 
 # Завантадення документу
 ${addDocument}                   xpath=//div/fieldset[2]/a[3]
@@ -44,7 +57,6 @@ ${byTenderNumber}                xpath=//*[@class="container"]/div[4]/a[2]
 ${PrecurementNumber}             id="ProcurementNumber"
 ${searchButton}                  id="search"
 *** Keywords ***
-
 #Виконано
 Підготувати дані для оголошення тендера
   [Arguments]  @{ARGUMENTS}
@@ -124,6 +136,28 @@ Login
   Input text                          ${tenderPeriodEndDate}                            ${tender_period_end_date}
   Click Element                       ${saveButton}
 #  Створена чернетка допорогового тендеру
+# Додавання лоту
+  Wait Until Page Contains Element      ${addLot}
+  click element                         ${addLot}
+  Wait Until Page Contains Element      ${lotHeader}
+  Input text                            ${lotHeader}                      Test title
+  Input text                            ${lotDescription}                 ${descr_lot}
+  Input text                            ${lotValueAmount}                 ${budget}
+  Input text                            ${lotGuaranteeAmount}             ${budget}
+  Input text                            ${lotMinimalStepAmount}           ${step_rate}
+  Click Element                         ${lotSaveButton}
+# Додавання номенклатури закупівлі
+  Wait Until Page Contains Element      ${addItemButton}                  10
+  Click Element                         ${addItemButton}
+  Wait Until Page Contains Element      ${lotDescription}                 10
+  Input Text                            ${lotDescription}                 ${descr_lot}
+  Click Element                         ${cpvcodelist}
+  Click Element                         ${addCpvCode}
+  Input Text                            ${unitCode}                       123
+  Input Text                            ${unitName}                       test text
+  Input Text                            ${unitQuantity}                   1000
+  Input Text                            ${deliveryDateStartDateLocal}     01.03.2017 00:00
+  Input Text                            ${deliveryDateEndDateLocal}       05.03.2017 00:00
 
 #Виконано
 # Додавання лоту
@@ -146,11 +180,11 @@ Login
   ...      ${ARGUMENTS[0]} ==  username
   ...      ${ARGUMENTS[1]} ==  ${filepath}
   ...      ${ARGUMENTS[2]} ==  ${TENDER}
-  ueex.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
-  Wait Until Page Contains Element       ${uploadButton}
-  Click Element     ${uploadButton}
-  Choose File       ${uploadButton}         ${ARGUMENTS[1]}
-  Sleep   2
+  kapitalist.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
+  Wait Until Page Contains Element             ${uploadButton}
+  Click Element                                ${uploadButton}
+  Choose File                                  ${uploadButton}   ${ARGUMENTS[1]}
+  Sleep             2
   Press Key         ENTER
   Reload Page
 #Виконано
