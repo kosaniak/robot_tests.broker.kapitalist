@@ -3,7 +3,7 @@ Library  Selenium2Screenshots
 Library  Selenium2Library
 Library  String
 Library  DateTime
-Resource  kapitalist_service.py
+Resource kapitalist_service.py
 
 *** Variables ***
 # Вхід в кабінет
@@ -44,6 +44,12 @@ ${unitName}                      id="Unit_Name"
 ${unitQuantity}                  id="Quantity"
 ${deliveryDateStartDateLocal}    id="DeliveryDate_StartDate_Local"
 ${deliveryDateEndDateLocal}      id="DeliveryDate_EndDate_Local"
+${deliveryAddressCountry}        id="DeliveryAddress_Country"
+${DeliveryAddress.Region}        id="DeliveryAddress.Region"
+${DeliveryAddress.City}          id="DeliveryAddress_Locality"
+${DeliveryAddress_PostalCode}    id="DeliveryAddress_PostalCode"
+${DeliveryAddress_Street}        id="DeliveryAddress_Street"
+${itemSaveButton}                xpath=//*[@type="submit"]
 
 # Завантадення документу
 ${addDocument}                   xpath=//div/fieldset[2]/a[3]
@@ -56,6 +62,7 @@ ${uploadButton}                  id="Document"
 ${byTenderNumber}                xpath=//*[@class="container"]/div[4]/a[2]
 ${PrecurementNumber}             id="ProcurementNumber"
 ${searchButton}                  id="search"
+${publicTenderButton}            xpath=//*[@type="submit"]
 *** Keywords ***
 #Виконано
 Підготувати дані для оголошення тендера
@@ -158,6 +165,14 @@ Login
   Input Text                            ${unitQuantity}                   1000
   Input Text                            ${deliveryDateStartDateLocal}     01.03.2017 00:00
   Input Text                            ${deliveryDateEndDateLocal}       05.03.2017 00:00
+  Input Text                            ${deliveryAddressCountry}         Україна
+  Input Text                            ${DeliveryAddress.Region}         Київська
+  Input Text                            ${DeliveryAddress.City}           Київ
+  Input Text                            ${DeliveryAddress_PostalCode}     00000
+  Input Text                            ${DeliveryAddress_Street}         Вулиця
+  Click Element                         ${itemSaveButton}
+  #Публікація тендеру
+  Click Element                         ${publicTenderButton}
 
 #Виконано
 # Додавання лоту
