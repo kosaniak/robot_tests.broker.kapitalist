@@ -1,85 +1,85 @@
-# -*- coding: utf-8 -*-
-import pytz
+# -*- coding: utf-8 -
+import string
+
+from iso8601 import parse_date
 import dateutil.parser
-import urllib
 
-from datetime import datetime
-from robot.libraries.BuiltIn import BuiltIn
 
-def get_webdriver():
-    se2lib = BuiltIn().get_library_instance('Selenium2Library')
-    return se2lib._current_browser()
-
-def is_checked(locator):
-    driver = get_webdriver()
-    return driver.find_element_by_id(locator).is_selected()
-
-def get_str(value):
-    return str(value)
-
-def get_budget(initial_tender_data):
-    return str(initial_tender_data.data.value.amount)
-
-def get_step_rate(initial_tender_data):
-    return str(initial_tender_data.data.minimalStep.amount)
-
-def get_quantity(item):
-    return str(item.quantity)
-
-def get_tenderAttempts(item):
-    return str(item.tenderAttempts)
-
-def get_tender_dates(initial_tender_data, key):
-    data_period = initial_tender_data.data.auctionPeriod
-    start_dt = dateutil.parser.parse(data_period['startDate'])
+def get_all_dates(initial_tender_data, key, subkey=None):
+    tender_period = initial_tender_data.data.tenderPeriod
+    enquiry_period = initial_tender_data.data.enquiryPeriod
+    end_period = dateutil.parser.parse(enquiry_period['endDate'])
+    start_dt = dateutil.parser.parse(tender_period['startDate'])
+    end_dt = dateutil.parser.parse(tender_period['endDate'])
     data = {
-        'StartDate': start_dt.strftime("%d.%m.%Y"),
-        'StartTime': start_dt.strftime("%H:%M"),
+        'EndPeriod': {
+            # 'date': end_period.strftime("%m/%d/%Y %H:%M"),
+            'date': end_period.strftime("%d.%m.%Y %H:%M"),
+            # 'time': end_period.strftime("%H:%M"),
+        },
+        'StartDate': {
+            # 'date': start_dt.strftime("%m/%d/%Y %H:%M"),
+            'date': start_dt.strftime("%d.%m.%Y %H:%M"),
+            # 'time': start_dt.strftime("%H:%M"),
+        },
+        'EndDate': {
+            # 'date': end_dt.strftime("%m/%d/%Y %H:%M"),
+            'date': end_dt.strftime("%d.%m.%Y %H:%M"),
+            # 'time': end_dt.strftime("%H:%M"),
+        },
     }
-    return data.get(key, '')
+    dt = data.get(key, {})
+    return dt.get(subkey) if subkey else dt
 
-def convert_ISO_DMY(isodate):
-    return dateutil.parser.parse(isodate).strftime("%d.%m.%Y")
 
-def convert_date(isodate):
-    return datetime.strptime(isodate, '%d.%m.%Y').date().isoformat()
+def convert_date_to_format(isodate):
+    iso_dt = parse_date(isodate)
+    # date_string = iso_dt.strftime("%m/%d/%Y")
+    date_string = iso_dt.strftime("%d.%m.%Y")
+    return date_string
 
-def convert_date_to_iso(v_date, v_time):
-    full_value = v_date+" "+v_time
-    date_obj = datetime.strptime(full_value, "%d.%m.%Y %H:%M")
-    time_zone = pytz.timezone('Europe/Kiev')
-    localized_date = time_zone.localize(date_obj)
-    return localized_date.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
-def convert_date_time_to_iso(v_date_time):
-    date_obj = datetime.strptime(v_date_time, "%d.%m.%Y %H:%M")
-    time_zone = pytz.timezone('Europe/Kiev')
-    localized_date = time_zone.localize(date_obj)
-    return localized_date.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+def convert_datetime_for_delivery(isodate):
+    iso_dt = parse_date(isodate)
+    date_string = iso_dt.strftime("%Y.%m.%d %H:%M")
+    return date_string
 
-def get_scheme(f_value):
-    return f_value.split(' ')[1]
 
-def procuringEntity_name(initial_tender_data):
-    initial_tender_data.data.procuringEntity['name'] = u"Test_company_from_Prozorro"
-    return initial_tender_data
+def convert_time_to_format(isodate):
+    iso_dt = parse_date(isodate)
+    time_string = iso_dt.strftime("%H:%M")
+    return time_string
 
-def adapt_procuringEntity(tender_data):
-    tender_data['data']['procuringEntity']['name'] = u'Test_company_from_Prozorro"'
-    return tender_data
 
-def is_qualified(tender_data):
-    if 'qualified' in tender_data['data']:
-        return  tender_data['data']['qualified']
-    return False
+def string_to_float(string):
+    return float(string)
 
-def is_eligible(tender_data):
-    if 'eligible' in tender_data['data']:
-        return  tender_data['data']['eligible']
-    return False
 
-def download_file(url, file_name, output_dir):
-    urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
+def change_data(initial_data):
+    initial_data['data']['items'][0]['deliveryAddress']['locality'] = u"м. Київ"
+    initial_data['data']['items'][0]['deliveryAddress']['region'] = u"Київська область"
+    initial_data['data']['items'][0]['classification']['description'] = u"Картонні коробки"
+    initial_data['data']['procuringEntity']['name'] = u"Степанов-Зайцева"
+    initial_data['data']['minimalStep']['amount'] = 750.11
+    return initial_data
 
-def inc(value):
-    return int(value) + 1
+
+def convert_string_to_common_string(string):
+    return {
+        u"Київська область": u"м. Київ",
+        u"Київ": u"м. Київ",
+        u"кг.": u"кілограм",
+        u"грн.": u"UAH",
+        u"(включаючи ПДВ)": True,
+        500.01: 100.1,
+    }.get(string, string)
+
+
+def get_tender_id(str_tender_id):
+    substr = u"Інформація про закупівлю "
+    index = 0
+    length = len(substr)
+    while string.find(str_tender_id, substr) != -1:
+        index = string.find(str_tender_id, substr)
+        str_tender_id = str_tender_id[0:index] + str_tender_id[index + length:]
+    return str_tender_id

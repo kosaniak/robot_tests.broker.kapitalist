@@ -4,6 +4,7 @@ Library  Selenium2Library
 Library  String
 Library  DateTime
 Library  kapitalist_service.py
+Library  DebugLibrary
 
 *** Variables ***
 # Вхід в кабінет
@@ -30,7 +31,7 @@ ${personalCabinetButton}         xpath=//*[@id="logoutForm"]//li/a/span
 ${addLot}                        xpath=//fieldset[2]/a[1]
 ${lotHeader}                     id=Title
 ${lotDescription}                id=Description
-${lotValueAmount}                xpath=//form/div[3]/div[3]/div/span[1]/span/input[1]
+${lotValueAmount}                id=Value_Amount
 ${lotGuaranteeAmount}            id=Guarantee_Amount
 ${lotMinimalStepAmount}          id=MinimalStep_Amount
 ${lotSaveButton}                 xpath=//*[@type="submit"]
@@ -46,7 +47,7 @@ ${unitQuantity}                  id=Quantity
 ${deliveryDateStartDateLocal}    id=DeliveryDate_StartDate_Local
 ${deliveryDateEndDateLocal}      id=DeliveryDate_EndDate_Local
 ${deliveryAddressCountry}        id=DeliveryAddress_Country
-${DeliveryAddress.Region}        id=DeliveryAddress.Region
+${DeliveryAddress.Region}        id=DeliveryAddress_Region
 ${DeliveryAddress.City}          id=DeliveryAddress_Locality
 ${DeliveryAddress_PostalCode}    id=DeliveryAddress_PostalCode
 ${DeliveryAddress_Street}        id=DeliveryAddress_Street
@@ -65,6 +66,12 @@ ${byTenderNumber}                xpath=//div[2]/a[2]
 ${PrecurementNumber}             id=ProcurementNumber
 ${searchButton}                  id=search
 ${publicTenderButton}            xpath=//*[@type="submit"]
+
+#Питання
+${addQuestionButton}             xpath=//*[@id="general"]/div/fieldset[1]/a[4]
+${QuestionTitle}                 id=Title
+${QuestionDescription}           id=Description
+${saveQuestionButton}            xpath=//*[@type="submit"]
 *** Keywords ***
 #Виконано
 Підготувати дані для оголошення тендера
@@ -159,22 +166,32 @@ ${publicTenderButton}            xpath=//*[@type="submit"]
   Wait Until Page Contains Element      ${lotHeader}
   Input text                            ${lotHeader}                      ${title}
   Input text                            ${lotDescription}                 ${description}
-  Sleep  5
-#  Execute Javascript                    document.getElementById('${lotValueAmount}').value="500";
-  Input text                            ${lotValueAmount}                 ${budget}
-  Input text                            ${lotGuaranteeAmount}             ${budget}
-  Input text                            ${lotMinimalStepAmount}           ${step_rate}
+  Sleep  3
+  Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${budget});
+  Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${budget});
+  Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${step_rate});
+#  Input text                            ${lotGuaranteeAmount}             ${budget}
+#  Input text                            ${lotMinimalStepAmount}           ${step_rate}
   Click Element                         ${lotSaveButton}
 # Додавання номенклатури закупівлі
   Wait Until Page Contains Element      ${addItemButton}                  10
   Click Element                         ${addItemButton}
   Wait Until Page Contains Element      ${lotDescription}                 10
   Input Text                            ${lotDescription}                 ${description}
-  Sleep  3
+  Sleep  1
   Click Element                         ${cpvcodelist}
+  Sleep  1
+  Wait Until Element Is Visible         ${searchCPV}                      10
+  Sleep  1
   Input Text                            ${searchCPV}                      ${cpv}
-  Input Text                            id="${cpv}_anchor"
-  Input Text                            ${unitCode}                       123
+  Sleep  1
+  Execute Javascript                    location.href = "#${cpv}_anchor";
+  Click Element                         id=${cpv}_anchor
+  Sleep  1
+  Execute Javascript                    location.href = "#Unit_Code";
+  Sleep  1
+  Wait Until Element Is Visible         ${unitCode}                       10
+  Input Text                            ${unitCode}                       ${unit}
   Input Text                            ${unitName}                       test text
   Input Text                            ${unitQuantity}                   1000
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
@@ -187,13 +204,14 @@ ${publicTenderButton}            xpath=//*[@type="submit"]
   Click Element                         ${itemSaveButton}
   #Публікація тендеру
   Click Element                         ${publicTenderButton}
-  ${tender_UAid}=  Get Text  id=tenderidua
+  ${tender_UAid}=  Get Text  xpath=//*[@id="tabstrip"]/../h3
   Sleep  1
+  ${tender_UAid}=  get_tender_id      ${tender_UAid}
   Log   ${tender_UAid}
-  ${Ids}=   Convert To String   ${tender_UAid}
+  ${Ids}=   Convert To String         ${tender_UAid}
   log to console      ${Ids}
   Log   ${Ids}
-  Run keyword if   '${mode}' == 'multi'   Set Multi Ids   ${ARGUMENTS[0]}   ${tender_UAid}
+#  Run keyword if   '${mode}' == 'multi'   Set Multi Ids   ${ARGUMENTS[0]}   ${tender_UAid}
   [return]  ${Ids}
 #Виконано
 # Додавання лоту
@@ -247,9 +265,9 @@ ${publicTenderButton}            xpath=//*[@type="submit"]
 
 #Не виконане програмістами
 Перейти до сторінки запитань
-  Wait Until Page Contains Element   id=questions_ref
-  Click Element     id=questions_ref
-  Wait Until Element Contains  id=records_shown      Y
+  Wait Until Page Contains Element   ${addQuestionButton}
+  Click Element                      ${addQuestionButton}
+  Wait Until Element Contains        ${QuestionTitle}           Y
 
 #Не виконане програмістами
 Перейти до сторінки відмін
@@ -266,12 +284,13 @@ ${publicTenderButton}            xpath=//*[@type="submit"]
   ...      ${ARGUMENTS[2]} ==  questionId
   ${title}=        Get From Dictionary  ${ARGUMENTS[2].data}  title
   ${description}=  Get From Dictionary  ${ARGUMENTS[2].data}  description
-  Wait Until Page Contains Element      xpath=(//*[@id='btn_question' and not(contains(@style,'display: none'))])
-  Click Element     id=btn_question
+#  Wait Until Page Contains Element      xpath=(//*[@id='btn_question' and not(contains(@style,'display: none'))])
+#  Click Element     id=btn_question
+  kapitalist.Перейти до сторінки запитань
   Sleep   3
-  Input text          id=e_title                 ${title}
-  Input text          id=e_description           ${description}
-  Click Element     id=SendQuestion
+  Input text          ${QuestionTitle}                 ${title}
+  Input text          ${QuestionDescription}           ${description}
+  Click Element       ${saveQuestionButton}
   Sleep  3
 
 Скасувати закупівлю
