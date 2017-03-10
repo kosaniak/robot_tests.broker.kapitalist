@@ -75,6 +75,9 @@ ${addQuestionButton}             xpath=//*[@id="general"]/div/fieldset[1]/a[4]
 ${QuestionTitle}                 id=Title
 ${QuestionDescription}           id=Description
 ${saveQuestionButton}            xpath=//*[@type="submit"]
+${answerQuestionButton}          xpath=//*[@id="general"]/div/fieldset/div[4]/fieldset/div[1]/div[4]/a
+${answer.text.field}             id=Answer
+${answer.save.button}            css=[type="submit"]
 *** Keywords ***
 #Виконано
 Підготувати дані для оголошення тендера
@@ -180,7 +183,7 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Wait Until Page Contains Element      ${addItemButton}                  10
   Click Element                         ${addItemButton}
   Wait Until Page Contains Element      ${lotDescription}                 10
-  Input Text                            ${lotDescription}                 ${description}
+  Input Text                            ${lotDescription}                 ${item_description}
   Sleep  1
   Click Element                         ${cpvcodelist}
   Sleep  1
@@ -194,8 +197,8 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Execute Javascript                    location.href = "#Unit_Code";
   Sleep  1
   Wait Until Element Is Visible         ${unitCode}                       10
-  Input Text                            ${unitCode}                       ${unit}
-  Input Text                            ${unitName}                       KGM
+  Input Text                            ${unitCode}                       KGM
+  Input Text                            ${unitName}                       ${unit}
   Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
@@ -204,13 +207,15 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Input Text                            ${DeliveryAddress.City}           м. Київ
   Input Text                            ${DeliveryAddress_PostalCode}     ${postalCode}
   Input Text                            ${DeliveryAddress_Street}         ${streetAddress}
-  Execute Javascript                    location.href = "#DeliveryLocation_Longitude";
-  Convert To String                     ${longitude}
+#  Execute Javascript                    location.href = "#DeliveryLocation_Longitude";
+#  Convert To String                     ${longitude}
 #  Input Text                            ${item.deliveryAdress.longtitude} 123
 #  Input Text                            ${item.deliveryAdress.latitude}   ${latitude}
   Click Element                         ${itemSaveButton}
   #Публікація тендеру
   Click Element                         ${publicTenderButton}
+  Sleep  3
+  wait until page contains element      xpath=//*[@id="tabstrip"]/../h3
   ${tender_UAid}=  Get Text  xpath=//*[@id="tabstrip"]/../h3
   Sleep  1
   ${tender_UAid}=  get_tender_id      ${tender_UAid}
@@ -427,6 +432,7 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   ${return_value}=   convert to number   ${return_value.replace(' ', '').replace(',', '.')}
   [return]           ${return_value}
 
+# Внесені правки
 Внести зміни в тендер
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -434,11 +440,11 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
   ...      ${ARGUMENTS[2]} ==  fieldname
   ...      ${ARGUMENTS[3]} ==  fieldvalue
-  Wait Until Page Contains Element   ${locator.edit.${ARGUMENTS[2]}}   5
-  Input Text       ${locator.edit.${ARGUMENTS[2]}}   ${ARGUMENTS[3]}
-  Click Element      id=btnPublic
-  Wait Until Page Contains      Публікацію виконано        5
-  ${result_field}=  Get Value   ${locator.edit.${ARGUMENTS[2]}}
+  Wait Until Page Contains Element   ${ARGUMENTS[2]}   5
+  Input Text                         ${ARGUMENTS[2]}   ${ARGUMENTS[3]}
+  Click Element                      ${publicTenderButton}
+#  Wait Until Page Contains      Публікацію виконано        5
+  ${result_field}=  Get Value        ${ARGUMENTS[2]}
   Should Be Equal   ${result_field}   ${ARGUMENTS[3]}
 
 Отримати інформацію про items[${index}].quantity
@@ -589,11 +595,11 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   ...      ${ARGUMENTS[2]} = 0
   ...      ${ARGUMENTS[3]} = answer_data
   ${answer}=     Get From Dictionary  ${ARGUMENTS[3].data}  answer
-  Перейти до сторінки запитань
-  Wait Until Page Contains Element      xpath=(//*[contains(@class, 'bt_addAnswer') and not(contains(@style,'display: none'))])
-  Click Element                         css=.bt_addAnswer:first-child
-  Input Text                            id=e_answer        ${answer}
-  Click Element                         id=SendAnswer
+  kapitalist.Пошук тендера по ідентифікатору        ${ARGUMENTS[0]}          ${ARGUMENTS[1]}
+  Wait Until Page Contains Element      ${answerQuestionButton}
+  Click Element                         ${answerQuestionButton}
+  Input Text                            ${answer.text.field}        ${answer}
+  Click Element                         ${answer.save.button}
   sleep   1
 
 Подати цінову пропозицію
@@ -788,8 +794,8 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   [Arguments]  ${username}  ${tender_uaid}  ${answer_data}  ${item_id}
   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
   Перейти до сторінки запитань
-  Wait Until Page Contains Element      xpath=(//span[contains(@class, 'btAnswer') and contains(@class, '${item_id}')])
-  Click Element                         xpath=(//span[contains(@class, 'btAnswer') and contains(@class, '${item_id}')])
+  Wait Until Page Contains Element      ${answerQuestionButton}
+  Click Element                         ${answerQuestionButton}
   Input Text                            id=e_answer        ${answer_data.data.answer}
   Click Element                         id=SendAnswer
   sleep   1
