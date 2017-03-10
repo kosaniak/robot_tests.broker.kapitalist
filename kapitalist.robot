@@ -51,6 +51,8 @@ ${DeliveryAddress.Region}        id=DeliveryAddress_Region
 ${DeliveryAddress.City}          id=DeliveryAddress_Locality
 ${DeliveryAddress_PostalCode}    id=DeliveryAddress_PostalCode
 ${DeliveryAddress_Street}        id=DeliveryAddress_Street
+${item.deliveryAdress.longtitude}      id=DeliveryLocation_Longitude
+${item.deliveryAdress.latitude}        id=DeliveryLocation_Latitude
 ${itemSaveButton}                xpath=//*[@type="submit"]
 
 # Завантадення документу
@@ -59,6 +61,7 @@ ${documentDescription}           id=Description
 #${typeOfDocument}
 #${languageOfDocument}
 ${uploadButton}                  id=Document
+${document.save.button}          css=[type="submit"]
 
 #Пошук тендеру по идентифікатору
 ${tenderSearchButton}            xpath=//*[@id="mainControl"]/a[3]
@@ -159,6 +162,7 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Click Element                       ${saveButton}
 #  Створена чернетка допорогового тендеру
   Sleep  1
+
 # Додавання лоту
 #Додати Предмет
   Wait Until Page Contains Element      ${addLot}
@@ -170,9 +174,8 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${budget});
   Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${budget});
   Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${step_rate});
-#  Input text                            ${lotGuaranteeAmount}             ${budget}
-#  Input text                            ${lotMinimalStepAmount}           ${step_rate}
   Click Element                         ${lotSaveButton}
+
 # Додавання номенклатури закупівлі
   Wait Until Page Contains Element      ${addItemButton}                  10
   Click Element                         ${addItemButton}
@@ -192,15 +195,19 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Sleep  1
   Wait Until Element Is Visible         ${unitCode}                       10
   Input Text                            ${unitCode}                       ${unit}
-  Input Text                            ${unitName}                       test text
-  Input Text                            ${unitQuantity}                   1000
+  Input Text                            ${unitName}                       KGM
+  Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
   Input Text                            ${deliveryAddressCountry}         Україна
-  Input Text                            ${DeliveryAddress.Region}         Київська
-  Input Text                            ${DeliveryAddress.City}           Київ
-  Input Text                            ${DeliveryAddress_PostalCode}     00000
-  Input Text                            ${DeliveryAddress_Street}         Вулиця
+  Input Text                            ${DeliveryAddress.Region}         м. Київ
+  Input Text                            ${DeliveryAddress.City}           м. Київ
+  Input Text                            ${DeliveryAddress_PostalCode}     ${postalCode}
+  Input Text                            ${DeliveryAddress_Street}         ${streetAddress}
+  Execute Javascript                    location.href = "#DeliveryLocation_Longitude";
+  Convert To String                     ${longitude}
+#  Input Text                            ${item.deliveryAdress.longtitude} 123
+#  Input Text                            ${item.deliveryAdress.latitude}   ${latitude}
   Click Element                         ${itemSaveButton}
   #Публікація тендеру
   Click Element                         ${publicTenderButton}
@@ -213,8 +220,9 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Log   ${Ids}
 #  Run keyword if   '${mode}' == 'multi'   Set Multi Ids   ${ARGUMENTS[0]}   ${tender_UAid}
   [return]  ${Ids}
+ Debug
 #Виконано
-# Додавання лоту
+# Додавання лоту(тетс пройшов)
 Додати предмет
   [Arguments]
   [Documentation]
@@ -227,12 +235,14 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Wait Until Page Contains Element      ${lotHeader}
   Input text                            ${lotHeader}                      ${title}
   Input text                            ${lotDescription}                 ${description}
-  Input text                            ${lotValueAmount}                 ${budget}
-  Input text                            ${lotGuaranteeAmount}             ${budget}
-  Input text                            ${lotMinimalStepAmount}           ${step_rate}
+  Sleep  3
+  Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${budget});
+  Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${budget});
+  Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${step_rate});
+#  Input text                            ${lotGuaranteeAmount}             ${budget}
+#  Input text                            ${lotMinimalStepAmount}           ${step_rate}
   Click Element                         ${lotSaveButton}
-
-#Виконано
+#Виконано(тест не пройшов)
 Завантажити документ
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -240,13 +250,15 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   ...      ${ARGUMENTS[1]} ==  ${filepath}
   ...      ${ARGUMENTS[2]} ==  ${TENDER}
   kapitalist.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
-  Wait Until Page Contains Element             ${uploadButton}
-  Click Element                                ${uploadButton}
+  Wait Until Page Contains Element             ${addDocument}        10
+  Click Element                                ${addDocument}
+  Input Text                                   ${documentDescription}  Test_document
   Choose File                                  ${uploadButton}   ${ARGUMENTS[1]}
   Sleep             2
   Press Key         ENTER
-  Reload Page
-#Виконано
+  Click Element                                ${document.save button}
+#  Reload Page
+#Виконано(тест пройшов для tender_owner)
 Пошук тендера по ідентифікатору
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -261,13 +273,16 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
   Wait Until Page Contains Element  ${PrecurementNumber}
   Input Text                        ${PrecurementNumber}                        ${ARGUMENTS[1]}
   Click Element                     ${searchButton}
-  Sleep  2
+#  Wait Until Page Contains          ${ARGUMENTS[1]}   10
+  Wait Until Page Contains Element    xpath=//*[@id="tender-table"]/tbody/tr[1]/td/a    10
+  Click Link    xpath=//*[@id="tender-table"]/tbody/tr[1]/td/a
+  sleep  1
 
-#Не виконане програмістами
+#Виконане
 Перейти до сторінки запитань
   Wait Until Page Contains Element   ${addQuestionButton}
   Click Element                      ${addQuestionButton}
-  Wait Until Element Contains        ${QuestionTitle}           Y
+  Wait Until Page Contains Element   ${QuestionTitle}           10
 
 #Не виконане програмістами
 Перейти до сторінки відмін
@@ -358,7 +373,7 @@ ${saveQuestionButton}            xpath=//*[@type="submit"]
 
 Отримати текст із поля і показати на сторінці
   [Arguments]   ${fieldname}
-  ${return_value}=   Get Text  ${locator.${fieldname}}
+  ${return_value}=   Get Text  ${fieldname}
   [return]           ${return_value}
 
 Отримати інформацію про title
