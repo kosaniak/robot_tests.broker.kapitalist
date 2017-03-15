@@ -70,7 +70,8 @@ def convert_string_to_common_string(string):
         u"Київ": u"м. Київ",
         u"кг.": u"кілограм",
         u"грн.": u"UAH",
-        u"(включаючи ПДВ)": True,
+        u" Картонні коробки": u"Картонні коробки",
+        u" З ПДВ": True,
         500.01: 100.1,
     }.get(string, string)
 
@@ -83,3 +84,7 @@ def get_tender_id(str_tender_id):
         index = string.find(str_tender_id, substr)
         str_tender_id = str_tender_id[0:index] + str_tender_id[index + length:]
     return str_tender_id
+
+def adapt_procuringEntity(tender_data):
+    tender_data['data']['procuringEntity']['name'] = u"qa_test"
+    return tender_data
