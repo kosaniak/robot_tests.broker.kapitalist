@@ -40,9 +40,6 @@ ${locator.questions[0].title}                                   css=[name="quest
 ${locator.questions[0].description}                             css=[name="question.Description"]
 ${locator.questions[0].date}                                    css=[name="question.Date"]
 ${locator.questions[0].answer}                                  css=[name="question.Answer"]
-# ${locator.value.currency}
-# ${locator.value.valueAddedTaxIncluded}
-# ${locator.items[0].unit.name}
 # ${locator.bids}
 ${locator.cancellations[0].status}                               css=[name="Status"]
 ${locator.cancellations[0].reason}                               css=[name="cancellation.Reason"]
@@ -82,8 +79,9 @@ ${addItemButton}                 xpath=//fieldset[3]/a[1]
 ${CpvCodeList}                   xpath=//*[@id='accordionCPV']/div/div/h4/a
 ${searchCPV}                     id=Classification_search
 ${addCpvCode}                    id=03121100-6_anchor
-${unitCode}                      id=Unit_Code
-${unitName}                      id=Unit_Name
+${unitCode}                      xpath=//*[@class="chosen-single"]/span
+${unitName}                      xpath=//*[@class="chosen-search"]/input
+${unit.active.result}            xpath=//*[@calss="active-result"]
 ${unitQuantity}                  id=Quantity
 ${deliveryDateStartDateLocal}    id=DeliveryDate_StartDate_Local
 ${deliveryDateEndDateLocal}      id=DeliveryDate_EndDate_Local
@@ -247,8 +245,10 @@ ${cancelation.submit.button}     css=[type="submit"]
   Execute Javascript                    location.href = "#Unit_Code";
   Sleep  1
   Wait Until Element Is Visible         ${unitCode}                       10
-  Input Text                            ${unitCode}                       KGM
+  Click Element                         ${unitCode}
   Input Text                            ${unitName}                       ${unit}
+  # Click Element                         ${unit.active.result}
+  Press Key                             ${unitName}                       \\\13
   Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
@@ -308,7 +308,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element                                ${tender.document.save.button}
   Reload Page
 
-#Виконано(тест пройшов)
+#Виконано
 Пошук тендера по ідентифікатору
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -443,6 +443,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${return_value}=   Get Text   id=tPosition_status
   [return]           ${return_value}
 
+# Виконано
 Отримати інформацію про description
   ${return_value}=   kapitalist.Отримати текст із поля і показати на сторінці   description
   [return]           ${return_value}
@@ -459,7 +460,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${return_value}=   convert to number   ${return_value.split(' ')[0].replace(',', '.')}
   [return]           ${return_value}
 
-# Внесені правки
+# Виконано
 Внести зміни в тендер
   [Arguments]   ${username}   ${tender_uaId}   ${field_value}   ${field_name}
    [Documentation]
@@ -609,18 +610,22 @@ ${cancelation.submit.button}     css=[type="submit"]
   # ${return_value}=   convert_datetime_for_delivery    ${return_value}
   [return]           ${return_value}
 
+# Виконано
 Отримати інформацію про questions[0].title
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].title
   [return]           ${return_value}
 
+# Виконано
 Отримати інформацію про questions[0].description
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].description
   [return]           ${return_value}
 
+# Виконано
 Отримати інформацію про questions[0].answer
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].answer
   [return]           ${return_value}
 
+# Виконано
 Отримати інформацію про questions[0].date
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].date
   ${return_value}=   convert_date_to_format   ${return_value}
@@ -771,210 +776,210 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${result}=    Get Text  id=aPosition_auctionUrl
   [return]   ${result}
 
-Завантажити документ в тендер з типом
-  [Arguments]  ${username}  ${tender_uaid}  ${filepath}  ${doc_type}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element                          id=btn_documents_add
-  Select From List By Value              id=slFile_documentType      ${doc_type}
-  Choose File                            xpath=(//*[@id='upload_form']/input[2])   ${filepath}
-  Sleep   2
-  Click Element     id=upload_button
+# Завантажити документ в тендер з типом
+#   [Arguments]  ${username}  ${tender_uaid}  ${filepath}  ${doc_type}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
+#   Click Element                          id=btn_documents_add
+#   Select From List By Value              id=slFile_documentType      ${doc_type}
+#   Choose File                            xpath=(//*[@id='upload_form']/input[2])   ${filepath}
+#   Sleep   2
+#   Click Element     id=upload_button
 
-Завантажити ілюстрацію
-  [Arguments]  ${username}  ${tender_uaid}  ${filepath}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element                          id=btn_documents_add
-  Select From List By Value              id=slFile_documentType      illustration
-  Choose File                            xpath=(//*[@id='upload_form']/input[2])   ${filepath}
-  Sleep   2
-  Click Element     id=upload_button
+# Завантажити ілюстрацію
+#   [Arguments]  ${username}  ${tender_uaid}  ${filepath}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
+#   Click Element                          id=btn_documents_add
+#   Select From List By Value              id=slFile_documentType      illustration
+#   Choose File                            xpath=(//*[@id='upload_form']/input[2])   ${filepath}
+#   Sleep   2
+#   Click Element     id=upload_button
 
-Додати Virtual Data Room
-  [Arguments]  ${username}  ${tender_uaid}  ${vdr_url}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element                          id=btn_documents_add
-  Select From List By Value              id=slFile_documentType      virtualDataRoom
-  Input text                             id=eFile_url                ${vdr_url}
-  Click Element     id=upload_button
+# Додати Virtual Data Room
+#   [Arguments]  ${username}  ${tender_uaid}  ${vdr_url}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
+#   Click Element                          id=btn_documents_add
+#   Select From List By Value              id=slFile_documentType      virtualDataRoom
+#   Input text                             id=eFile_url                ${vdr_url}
+#   Click Element     id=upload_button
 
-Додати публічний паспорт активу
-  [Arguments]  ${username}  ${tender_uaid}  ${vdr_url}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element                          id=btn_documents_add
-  Select From List By Value              id=slFile_documentType      x_dgfPublicAssetCertificate
-  Input text                             id=eFile_url                ${vdr_url}
-  Click Element     id=upload_button
+# Додати публічний паспорт активу
+#   [Arguments]  ${username}  ${tender_uaid}  ${vdr_url}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
+#   Click Element                          id=btn_documents_add
+#   Select From List By Value              id=slFile_documentType      x_dgfPublicAssetCertificate
+#   Input text                             id=eFile_url                ${vdr_url}
+#   Click Element     id=upload_button
 
-Додати офлайн документ
-  [Arguments]  ${username}  ${tender_uaid}  ${accessDetails}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element                          id=btn_documents_add
-  Select From List By Value              id=slFile_documentType      x_dgfAssetFamiliarization
-  Input text                             id=eFile_accessDetails      ${accessDetails}
-  Click Element     id=upload_button
+# Додати офлайн документ
+#   [Arguments]  ${username}  ${tender_uaid}  ${accessDetails}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Wait Until Page Contains Element       xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
+#   Click Element                          id=btn_documents_add
+#   Select From List By Value              id=slFile_documentType      x_dgfAssetFamiliarization
+#   Input text                             id=eFile_accessDetails      ${accessDetails}
+#   Click Element     id=upload_button
 
-Отримати інформацію із документа по індексу
-  [Arguments]  ${username}  ${tender_uaid}  ${document_index}  ${field}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  ${doc_value}=  Get Text   xpath=(//*[@id='pn_documentsContent_']/table[${document_index + 1}]//span[contains(@class, 'documentType')])
-  [return]  ${doc_value}
+# Отримати інформацію із документа по індексу
+#   [Arguments]  ${username}  ${tender_uaid}  ${document_index}  ${field}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   ${doc_value}=  Get Text   xpath=(//*[@id='pn_documentsContent_']/table[${document_index + 1}]//span[contains(@class, 'documentType')])
+#   [return]  ${doc_value}
 
-Отримати інформацію із документа
-  [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
-  ${doc_value}=  Run Keyword If   '${field_name}' == 'description'
-  ...     Get Text    xpath=(//span[contains(@class, 'description') and contains(@class, '${doc_id}')])
-  ...     ELSE    Get Text   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
-  [Return]   ${doc_value}
+# Отримати інформацію із документа
+#   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
+#   ${doc_value}=  Run Keyword If   '${field_name}' == 'description'
+#   ...     Get Text    xpath=(//span[contains(@class, 'description') and contains(@class, '${doc_id}')])
+#   ...     ELSE    Get Text   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+#   [Return]   ${doc_value}
 
-# Виконано
-Відповісти на запитання
-  [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Перейти до сторінки запитань
-  Wait Until Page Contains Element      ${answerQuestionButton}
-  Click Element                         ${answerQuestionButton}
-  Input Text                            id=e_answer        ${answer_data.data.answer}
-  Click Element                         id=SendAnswer
-  sleep   1
+# # Виконано
+# Відповісти на запитання
+#   [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Перейти до сторінки запитань
+#   Wait Until Page Contains Element      ${answerQuestionButton}
+#   Click Element                         ${answerQuestionButton}
+#   Input Text                            id=e_answer        ${answer_data.data.answer}
+#   Click Element                         id=SendAnswer
+#   sleep   1
 
-Отримати кількість предметів в тендері
-  [Arguments]  ${username}  ${tender_uaid}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  ${return_value}=    Get Text           id=tPosition_items_count
-  ${return_value}=    Convert To Number  ${return_value}
-  [return]            ${return_value}
+# Отримати кількість предметів в тендері
+#   [Arguments]  ${username}  ${tender_uaid}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   ${return_value}=    Get Text           id=tPosition_items_count
+#   ${return_value}=    Convert To Number  ${return_value}
+#   [return]            ${return_value}
 
-Отримати інформацію із запитання
-  [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Перейти до сторінки запитань
-  ${return_value}=      Run Keyword If   '${field_name}' == 'title'
-  ...     Get Text    xpath=(//span[contains(@class, 'qa_title') and contains(@class, '${item_id}')])
-  ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
-  ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
-  [return]           ${return_value}
+# Отримати інформацію із запитання
+#   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Перейти до сторінки запитань
+#   ${return_value}=      Run Keyword If   '${field_name}' == 'title'
+#   ...     Get Text    xpath=(//span[contains(@class, 'qa_title') and contains(@class, '${item_id}')])
+#   ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
+#   ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
+#   [return]           ${return_value}
 
-Задати запитання на тендер
-  [Arguments]  ${username}  ${tender_uaid}  ${question}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Задати питання   ${username}    ${tender_uaid}     ${question}
+# Задати запитання на тендер
+#   [Arguments]  ${username}  ${tender_uaid}  ${question}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Задати питання   ${username}    ${tender_uaid}     ${question}
 
-Задати запитання на предмет
-  [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${question}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
-  Click Element     xpath=(//span[contains(@class, 'bt_item_question') and contains(@class, '${item_id}')])
-  Sleep  3
-  Input text          id=e_title                 ${question.data.title}
-  Input text          id=e_description           ${question.data.description}
-  Click Element     id=SendQuestion
-  Sleep  3
+# Задати запитання на предмет
+#   [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${question}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
+#   Click Element     xpath=(//span[contains(@class, 'bt_item_question') and contains(@class, '${item_id}')])
+#   Sleep  3
+#   Input text          id=e_title                 ${question.data.title}
+#   Input text          id=e_description           ${question.data.description}
+#   Click Element     id=SendQuestion
+#   Sleep  3
 
-Додати предмет закупівлі
-  [Arguments]  ${username}  ${tender_uaid}  ${item}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  ${index}=  kapitalist.Отримати кількість предметів в тендері     ${username}   ${tender_uaid}
-  ${ItemAddButtonVisible}=    Page Should Contain Element    id=btn_items_add
-  Run Keyword If  '${ItemAddButtonVisible}'=='PASS'   Run Keywords
-  ...   Додати предмет                ${item}                ${index}
-  ...   AND    Click Element                 id=btnPublic
-  ...   AND    Wait Until Page Contains      Публікацію виконано    10
+# Додати предмет закупівлі
+#   [Arguments]  ${username}  ${tender_uaid}  ${item}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   ${index}=  kapitalist.Отримати кількість предметів в тендері     ${username}   ${tender_uaid}
+#   ${ItemAddButtonVisible}=    Page Should Contain Element    id=btn_items_add
+#   Run Keyword If  '${ItemAddButtonVisible}'=='PASS'   Run Keywords
+#   ...   Додати предмет                ${item}                ${index}
+#   ...   AND    Click Element                 id=btnPublic
+#   ...   AND    Wait Until Page Contains      Публікацію виконано    10
 
-Видалити предмет закупівлі
-  [Arguments]  ${username}  ${tender_uaid}  ${item_id}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  ${ItemAddButtonVisible}=    Page Should Contain Element    id=btn_items_add
-  Run Keyword If  '${ItemAddButtonVisible}'=='PASS'   Run Keywords
-  ...   Wait Until Page Contains Element   xpath=(//ul[contains(@class, 'bt_item_delete') and contains(@class, ${item_id})])
-  ...   AND    Click Element     xpath=(//ul[contains(@class, 'bt_item_delete') and contains(@class, ${item_id})])
-  ...   AND    Click Element      id=btnPublic
-  ...   AND    Wait Until Page Contains      Публікацію виконано         10
+# Видалити предмет закупівлі
+#   [Arguments]  ${username}  ${tender_uaid}  ${item_id}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   ${ItemAddButtonVisible}=    Page Should Contain Element    id=btn_items_add
+#   Run Keyword If  '${ItemAddButtonVisible}'=='PASS'   Run Keywords
+#   ...   Wait Until Page Contains Element   xpath=(//ul[contains(@class, 'bt_item_delete') and contains(@class, ${item_id})])
+#   ...   AND    Click Element     xpath=(//ul[contains(@class, 'bt_item_delete') and contains(@class, ${item_id})])
+#   ...   AND    Click Element      id=btnPublic
+#   ...   AND    Wait Until Page Contains      Публікацію виконано         10
 
-Отримати кількість документів в тендері
-  [Arguments]  ${username}  ${tender_uaid}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  ${tender_doc_number}=   Get Matching Xpath Count   xpath=(//*[@id='pn_documentsContent_']/table)
-  [Return]  ${tender_doc_number}
+# Отримати кількість документів в тендері
+#   [Arguments]  ${username}  ${tender_uaid}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   ${tender_doc_number}=   Get Matching Xpath Count   xpath=(//*[@id='pn_documentsContent_']/table)
+#   [Return]  ${tender_doc_number}
 
-Отримати документ
-  [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Click Element   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
-  sleep   3
-  ${file_name}=   Get Text    xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
-  ${url}=   Get Element Attribute    xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])@href
-  download_file   ${url}  ${file_name.split('/')[-1]}  ${OUTPUT_DIR}
-  [return]  ${file_name.split('/')[-1]}
+# Отримати документ
+#   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Click Element   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+#   sleep   3
+#   ${file_name}=   Get Text    xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+#   ${url}=   Get Element Attribute    xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])@href
+#   download_file   ${url}  ${file_name.split('/')[-1]}  ${OUTPUT_DIR}
+#   [return]  ${file_name.split('/')[-1]}
 
-Отримати дані із документу пропозиції
-  [Arguments]  ${username}  ${tender_uaid}  ${bid_index}  ${document_index}  ${field}
-  ${document_index}=        inc         ${document_index}
-  ${result}=   Get Text                 xpath=(//*[@id='pnAwardList']/div[last()]/div/div[1]/div/div/div[2]/table[${document_index}]//span[contains(@class, 'documentType')])
-  [Return]   ${result}
+# Отримати дані із документу пропозиції
+#   [Arguments]  ${username}  ${tender_uaid}  ${bid_index}  ${document_index}  ${field}
+#   ${document_index}=        inc         ${document_index}
+#   ${result}=   Get Text                 xpath=(//*[@id='pnAwardList']/div[last()]/div/div[1]/div/div/div[2]/table[${document_index}]//span[contains(@class, 'documentType')])
+#   [Return]   ${result}
 
-Отримати кількість документів в ставці
-  [Arguments]  ${username}  ${tender_uaid}  ${bid_index}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  ${bid_doc_number}=   Get Matching Xpath Count   xpath=(//*[@id='pnAwardList']/div[last()]/div/div[1]/div/div/div[2]/table)
-  [Return]  ${bid_doc_number}
+# Отримати кількість документів в ставці
+#   [Arguments]  ${username}  ${tender_uaid}  ${bid_index}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   ${bid_doc_number}=   Get Matching Xpath Count   xpath=(//*[@id='pnAwardList']/div[last()]/div/div[1]/div/div/div[2]/table)
+#   [Return]  ${bid_doc_number}
 
-Скасування рішення кваліфікаційної комісії
-  [Arguments]  ${username}  ${tender_uaid}  ${award_num}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Wait Until Page Contains Element      xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Cancel_button')])
-  Sleep   1
-  Click Element                         xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Cancel_button')])
+# Скасування рішення кваліфікаційної комісії
+#   [Arguments]  ${username}  ${tender_uaid}  ${award_num}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Wait Until Page Contains Element      xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Cancel_button')])
+#   Sleep   1
+#   Click Element                         xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Cancel_button')])
 
-Підтвердити постачальника
-  [Arguments]  ${username}  ${tender_uaid}  ${award_num}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Wait Until Page Contains Element      xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'award_button')])
-  Sleep   1
-  Click Element                         xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'award_button')])
+# Підтвердити постачальника
+#   [Arguments]  ${username}  ${tender_uaid}  ${award_num}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Wait Until Page Contains Element      xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'award_button')])
+#   Sleep   1
+#   Click Element                         xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'award_button')])
 
-Дискваліфікувати постачальника
-  [Arguments]  ${username}  ${tender_uaid}  ${award_num}  ${description}
-  Input text          xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Reject_description')])                 ${description}
-  Click Element       xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Reject_button')])
+# Дискваліфікувати постачальника
+#   [Arguments]  ${username}  ${tender_uaid}  ${award_num}  ${description}
+#   Input text          xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Reject_description')])                 ${description}
+#   Click Element       xpath=(//*[@id='pnAwardList']/div[last()]//*[contains(@class, 'Reject_button')])
 
-Завантажити документ рішення кваліфікаційної комісії
-  [Arguments]  ${username}  ${filepath}  ${tender_uaid}  ${award_num}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
-  Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//div[contains(@class, 'award_docs')]//span[contains(@class, 'add_document')])
-  Choose File                  xpath=(//*[@id='upload_form']/input[2])   ${filepath}
-  Sleep   2
-  Click Element     id=upload_button
-  Reload Page
+# Завантажити документ рішення кваліфікаційної комісії
+#   [Arguments]  ${username}  ${filepath}  ${tender_uaid}  ${award_num}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
+#   Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//div[contains(@class, 'award_docs')]//span[contains(@class, 'add_document')])
+#   Choose File                  xpath=(//*[@id='upload_form']/input[2])   ${filepath}
+#   Sleep   2
+#   Click Element     id=upload_button
+#   Reload Page
 
-Завантажити протокол аукціону
-  [Arguments]  ${username}  ${tender_uaid}  ${filepath}  ${award_index}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Wait Until Page Contains Element          xpath=(//*[@id='btnShowBid' and not(contains(@style,'display: none'))])
-  Click Element       id=btnShowBid
-  Sleep   1
-  Wait Until Page Contains Element          xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element                             id=btn_documents_add
-  Select From List By Value    id=slFile_documentType      auctionProtocol
-  Choose File                  xpath=(//*[@id='upload_form']/input[2])   ${filepath}
-  Sleep   2
-  Click Element     id=upload_button
+# Завантажити протокол аукціону
+#   [Arguments]  ${username}  ${tender_uaid}  ${filepath}  ${award_index}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Wait Until Page Contains Element          xpath=(//*[@id='btnShowBid' and not(contains(@style,'display: none'))])
+#   Click Element       id=btnShowBid
+#   Sleep   1
+#   Wait Until Page Contains Element          xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
+#   Click Element                             id=btn_documents_add
+#   Select From List By Value    id=slFile_documentType      auctionProtocol
+#   Choose File                  xpath=(//*[@id='upload_form']/input[2])   ${filepath}
+#   Sleep   2
+#   Click Element     id=upload_button
 
-Завантажити угоду до тендера
-  [Arguments]  ${username}  ${tender_uaid}  ${contract_num}  ${filepath}
-  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
-  Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//div[contains(@class, 'contract_docs')]//span[contains(@class, 'add_document')])
-  Select From List By Value    id=slFile_documentType      contractSigned
-  Choose File                  xpath=(//*[@id='upload_form']/input[2])   ${filepath}
-  Sleep   2
-  Click Element     id=upload_button
-  Reload Page
+# Завантажити угоду до тендера
+#   [Arguments]  ${username}  ${tender_uaid}  ${contract_num}  ${filepath}
+#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#   Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
+#   Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//div[contains(@class, 'contract_docs')]//span[contains(@class, 'add_document')])
+#   Select From List By Value    id=slFile_documentType      contractSigned
+#   Choose File                  xpath=(//*[@id='upload_form']/input[2])   ${filepath}
+#   Sleep   2
+#   Click Element     id=upload_button
+#   Reload Page
 
 Підтвердити підписання контракту
   [Arguments]  ${username}  ${tender_uaid}  ${contract_num}
