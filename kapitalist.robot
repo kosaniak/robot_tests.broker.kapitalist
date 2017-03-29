@@ -79,14 +79,14 @@ ${addItemButton}                 xpath=//fieldset[3]/a[1]
 ${CpvCodeList}                   xpath=//*[@id='accordionCPV']/div/div/h4/a
 ${searchCPV}                     id=Classification_search
 ${addCpvCode}                    id=03121100-6_anchor
-${unitCode}                      xpath=//*[@class="chosen-single"]/span
+${unitCode}                      xpath=//*[@id="UnitId_chosen"]/a/span    #xpath=//*[@class="chosen-single"]/span
 ${unitName}                      xpath=//*[@class="chosen-search"]/input
 ${unit.active.result}            xpath=//*[@calss="active-result"]
 ${unitQuantity}                  id=Quantity
 ${deliveryDateStartDateLocal}    id=DeliveryDate_StartDate_Local
 ${deliveryDateEndDateLocal}      id=DeliveryDate_EndDate_Local
 ${deliveryAddressCountry}        id=DeliveryAddress_Country
-${DeliveryAddress.Region}        id=DeliveryAddress_Region
+${DeliveryAddress.Region}        name=DeliveryAddress.Region_input
 ${DeliveryAddress.City}          id=DeliveryAddress_Locality
 ${DeliveryAddress_PostalCode}    id=DeliveryAddress_PostalCode
 ${DeliveryAddress_Street}        id=DeliveryAddress_Street
@@ -129,7 +129,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 #Виконано
 Підготувати дані для оголошення тендера
-  [Arguments]    ${username}    ${tender_data}
+  [Arguments]    ${username}    ${tender_data}     ${role_name}
   ${tender_data}=    adapt_procuringEntity    ${tender_data}
   [Return]    ${tender_data}
 
@@ -227,8 +227,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element                         ${lotSaveButton}
   Sleep  3
 
-# Додавання номенклатури закупівлі
-  Wait Until Page Contains Element      ${addItemButton}                  10
+# Додавання номенклатури Suite Setup
+  #!/usr/bin/env  Until Page Contains Element      ${addItemButton}                  10
   Click Element                         ${addItemButton}
   Wait Until Page Contains Element      ${lotDescription}                 10
   Input Text                            ${lotDescription}                 ${items_description}
@@ -242,18 +242,23 @@ ${cancelation.submit.button}     css=[type="submit"]
   Execute Javascript                    location.href = "#${cpv}_anchor";
   Click Element                         id=${cpv}_anchor
   Sleep  1
-  Execute Javascript                    location.href = "#Unit_Code";
-  Sleep  1
-  Wait Until Element Is Visible         ${unitCode}                       10
-  Click Element                         ${unitCode}
+  # Execute Javascript                    location.href = "${unitCode}";
+  # Sleep  1
+  # Wait Until Element Is Visible         ${unitCode}                       10
+  # Click Element                         ${unitCode}
+  # Select From List                      xpath=//*[@calss="chosen-results"]     ${unit}
+  Execute Javascript                     $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
+  # Click Element                         ${unitCode}
+  # Sleep   2
   Input Text                            ${unitName}                       ${unit}
   # Click Element                         ${unit.active.result}
   Press Key                             ${unitName}                       \\\13
   Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
-  Input Text                            ${deliveryAddressCountry}         Україна
-  Input Text                            ${DeliveryAddress.Region}         м. Київ
+  # Input Text                            ${deliveryAddressCountry}         Україна
+  Input Text                            ${DeliveryAddress.Region}         Київська область
+  # Press Key                             ${DeliveryAddress.Region}         \\\13
   Input Text                            ${DeliveryAddress.City}           м. Київ
   Input Text                            ${DeliveryAddress_PostalCode}     ${postalCode}
   Input Text                            ${DeliveryAddress_Street}         ${streetAddress}
@@ -272,7 +277,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Log   ${Ids}
 #  Run keyword if   '${mode}' == 'multi'   Set Multi Ids   ${ARGUMENTS[0]}   ${tender_UAid}
   [return]  ${Ids}
- Debug
+Debug
 
 #Виконано
 Додати предмет
@@ -324,8 +329,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Input Text                        ${PrecurementNumber}                        ${ARGUMENTS[1]}
   Click Element                     ${searchButton}
   Sleep   3
-  Wait Until Page Contains Element    xpath=//*[@id="tender-table"]/tbody/tr[1]/td/a    10
-  Click Link    xpath=//*[@id="tender-table"]/tbody/tr[1]/td/a
+  Wait Until Page Contains Element    xpath=//*[@id="tender-table"]//a    10
+  Click Link                          xpath=//*[@id="tender-table"]//a
   sleep  1
 
 #Виконане
@@ -410,12 +415,15 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 # Виконано
 Отримати інформацію із тендера
-  [Arguments]  ${username}  ${fieldname}
+  [Arguments]  ${username}     ${tender_data}    ${fieldname}
   [Documentation]
   ...      ${ARGUMENTS[0]} ==  username
   ...      ${ARGUMENTS[1]} ==  fieldname
-  ${return_value}=  run keyword  kapitalist.Отримати інформацію про ${fieldname}
-  [return]           ${return_value}
+  # ${return_value}=  run keyword  kapitalist.Отримати інформацію про ${fieldname}
+  # [return]           ${return_value}
+  # Switch browser  ${username}
+  ${return_value}=  Run Keyword  Отримати інформацію про ${fieldname}
+  [Return]  ${return_value}
 
 # Виконано
 Отримати текст із поля і показати на сторінці
@@ -582,6 +590,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.countryName
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.countryName
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -597,6 +606,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
