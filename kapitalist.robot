@@ -22,6 +22,7 @@ ${locator.tenderPeriod.endDate}                                 xpath=//*[@name=
 ${locator.enquiryPeriod.startDate}                              xpath=//*[@name="EnquiryPeriod"]/span[1]
 ${locator.enquiryPeriod.endDate}                                xpath=//*[@name="EnquiryPeriod"]/span[2]
 ${locator.items[0].description}                                 xpath=//*[@name="item.Description"]
+${locator.items[0].deliveryDate.startDate}                      xpath=//*[@name="item.DeliveryDate"]/span[1]
 ${locator.items[0].deliveryDate.endDate}                        xpath=//*[@name="item.DeliveryDate"]/span[2]
 ${locator.items[0].deliveryLocation.latitude}
 ${locator.items[0].deliveryLocation.longitude}
@@ -496,7 +497,7 @@ Debug
 Отримати інформацію про items[${index}].unit.code
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[${index}].unit.code
   # ${return_value}=   Convert To String     ${return_value.split(' ')[1]}
-  ${return_value}=   Convert To String    KGM
+  # ${return_value}=   Convert To String    KGM
   [return]  ${return_value}
 
 # Виконано
@@ -522,9 +523,9 @@ Debug
 # Виконано
 Отримати інформацію про items[${index}].classification.description
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[${index}].classification.description
-  ${return_value}=   Remove String     ${return_value}     44617100-9
-  ${return_value}=   convert_string_to_common_string   ${return_value}
-  [return]           ${return_value}
+  # ${return_value}=   Remove String     ${return_value}     44617100-9
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
+  [return]           ${return_value.split(' ')[1]}
 
 # Виконано
 Отримати інформацію про value.currency
@@ -535,8 +536,8 @@ Debug
 # Виконано
 Отримати інформацію про value.valueAddedTaxIncluded
   ${return_value}=   Отримати текст із поля і показати на сторінці        value.valueAddedTaxIncluded
-  ${return_value}=   Remove String      ${return_value}    50000,99 UAH
-  ${return_value}=   convert_string_to_common_string      ${return_value}
+  # ${return_value}=   Remove String      ${return_value}    50000,99 UAH
+  # ${return_value}=   convert_string_to_common_string      ${return_value}
   [return]  ${return_value}
 
 # Виконано
@@ -606,7 +607,7 @@ Debug
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
-  ${return_value}=   convert_string_to_common_string   ${return_value}
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -615,6 +616,12 @@ Debug
   [return]           ${return_value}
 
 # Внесені правки
+Отримати інформацію про items[0].deliveryDate.startDate
+  ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
+  # ${return_value}=   convert_datetime_for_delivery    ${return_value}
+  [return]           ${return_value}
+
+  # Внесені правки
 Отримати інформацію про items[0].deliveryDate.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
   # ${return_value}=   convert_datetime_for_delivery    ${return_value}
