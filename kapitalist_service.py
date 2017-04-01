@@ -71,7 +71,7 @@ def convert_string_to_common_string(string):
         u"кг.": u"кілограм",
         u"грн.": u"UAH",
         u" Картонні коробки": u"Картонні коробки",
-        u" З ПДВ": True,
+        u"З ПДВ": True,
         500.01: 100.1,
     }.get(string, string)
 
@@ -85,6 +85,13 @@ def get_tender_id(str_tender_id):
         str_tender_id = str_tender_id[0:index] + str_tender_id[index + length:]
     return str_tender_id
 
+
 def adapt_procuringEntity(tender_data):
     tender_data['data']['procuringEntity']['name'] = u"qa_test"
     return tender_data
+
+
+def remove_first_word(str):
+    return str.lstrip(str.split(' ')[0]+' ')
+    
+

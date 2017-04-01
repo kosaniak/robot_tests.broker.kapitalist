@@ -35,7 +35,7 @@ ${locator.items[0].classification.scheme}                       xpath=//*[contai
 ${locator.items[0].classification.id}                           css=[name="item.Classification"]
 ${locator.items[0].classification.description}                  css=[name="item.Classification"]
 ${locator.items[0].unit.name}                                   css=[name="item.Quantity"]
-${locator.items[0].unit.code}                                   css=[name="item.Quantity"]
+${locator.items[0].unit.code}                                   css=[name="item.Unit.Code"]
 ${locator.items[0].quantity}                                    css=[name="item.Quantity"]
 ${locator.questions[0].title}                                   css=[name="question.Title"]
 ${locator.questions[0].description}                             css=[name="question.Description"]
@@ -496,7 +496,7 @@ Debug
 # Виконано
 Отримати інформацію про items[${index}].unit.code
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[${index}].unit.code
-  # ${return_value}=   Convert To String     ${return_value.split(' ')[1]}
+  ${return_value}=   Convert To String     ${return_value}
   # ${return_value}=   Convert To String    KGM
   [return]  ${return_value}
 
@@ -523,9 +523,9 @@ Debug
 # Виконано
 Отримати інформацію про items[${index}].classification.description
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[${index}].classification.description
-  # ${return_value}=   Remove String     ${return_value}     44617100-9
+  ${return_value}=   remove_first_word     ${return_value}
   # ${return_value}=   convert_string_to_common_string   ${return_value}
-  [return]           ${return_value.split(' ')[1]}
+  [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про value.currency
@@ -536,8 +536,8 @@ Debug
 # Виконано
 Отримати інформацію про value.valueAddedTaxIncluded
   ${return_value}=   Отримати текст із поля і показати на сторінці        value.valueAddedTaxIncluded
-  # ${return_value}=   Remove String      ${return_value}    50000,99 UAH
-  # ${return_value}=   convert_string_to_common_string      ${return_value}
+  ${return_value}=   Remove String      ${return_value}    ${return_value.split(' ')[0]+' UAH '}
+  ${return_value}=   convert_string_to_common_string      ${return_value}
   [return]  ${return_value}
 
 # Виконано
