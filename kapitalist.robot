@@ -51,7 +51,7 @@ ${loginLink}                     id=loginLink
 ${loginEmailField}               id=Email
 ${loginPasswordField}            id=Password
 ${submitButton}                  xpath=//*[@type="submit"]
-${createTenderButton}            xpath=//*[@id="mainControl"]/a[1]/div
+${createTenderButton}            xpath=//*[@id="mainControl"]/a[2]
 #Тип тендеру - Допорогові закупівлі
 ${typeOfAdvertisementLink}       xpath=//* [text()="Допорогові закупівлі"]
 ${tender.title}                  css=#Title
@@ -102,8 +102,8 @@ ${uploadButton}                  id=Document
 ${tender.document.save.button}          css=[type="submit"]
 
 #Пошук тендеру по идентифікатору
-${tenderSearchButton}            xpath=//*[@id="mainControl"]/a[3]
-${byTenderNumber}                xpath=//div[2]/a[2]
+${tenderSearchButton}            xpath=//*[@id="mainControl"]/a[1]
+${byTenderNumber}                xpath=//*[@class="container-fluid"]/div/a[2]
 ${PrecurementNumber}             id=ProcurementNumber
 ${searchButton}                  id=search
 ${publicTenderButton}            xpath=//*[@type="submit"]
