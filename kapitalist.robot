@@ -117,6 +117,14 @@ ${answerQuestionButton}          xpath=//fieldset/div/div[4]/a
 ${answer.text.field}             id=Answer
 ${answer.save.button}            css=[type="submit"]
 
+#Подання пропозиції
+${bid_take_part_button}              xpath=//*[@id="general"]//a[contains(text(), "Взяти участь")]
+${bid_select_lot_checkbox}           xpath=//*[@class="cr"]
+${bid_lot_value}                     id=Lots_c6a6d754-6ccc-48f4-b4f6-37a59c90f440__Value
+${bid_add_document}                  id=files
+${bid_approve_button}                xpath=//*[@type="submit"]
+
+
 
 #Скасування тендеру
 ${delete.tender.button}          xpath=//*[@id="general"]/div/fieldset[1]/div[2]/a[2]
@@ -566,7 +574,7 @@ Debug
 # Виконано
 Отримати інформацію про tenderPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.startDate
-  # ${return_value}=   convert_date_to_format    ${date_value}
+  ${return_value}=   convert_date_to_format    ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -666,23 +674,24 @@ Debug
   sleep   1
 
 Подати цінову пропозицію
-  [Arguments]  @{ARGUMENTS}
+  [Arguments]  @{ARGUMENTS}   ${username}    ${tender_id}   ${test_bid_data}
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
   ...    ${ARGUMENTS[2]} ==  ${test_bid_data}
-  ${amount}=    get_str          ${ARGUMENTS[2].data.value.amount}
-  ${is_qualified}=   is_qualified         ${ARGUMENTS[2]}
-  ${is_eligible}=    is_eligible          ${ARGUMENTS[2]}
-  kapitalist.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
-  Wait Until Page Contains Element          xpath=(//*[@id='btnBid' and not(contains(@style,'display: none'))])
-  Click Element       id=btnBid
+  ${amount}=    get_str          ${${test_bid_data}.data.value.amount}
+  ${is_qualified}=   is_qualified         ${test_bid_data}
+  ${is_eligible}=    is_eligible          ${test_bid_data}
+  kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
+  Wait Until Page Contains Element          ${bid_take_part_button}
+  Click Element                             ${bid_take_part_button}
   Sleep   3
-  Wait Until Page Contains Element          xpath=(//*[@id='eBid_price' and not(contains(@style,'display: none'))])
-  Input Text          id=eBid_price         ${amount}
-  Run Keyword If    ${is_qualified}   Click Element   id=lcbBid_selfQualified
-  Run Keyword If    ${is_eligible}    Click Element   id=lcbBid_selfEligible
-  Click Element       id=btn_save
+  Wait Until Page Contains Element          ${bid_select_lot_checkbox}
+  Click Element                             ${bid_select_lot_checkbox}
+  Execute Javascript                        $(${bid_lot_value}).data("kendoNumericTextBox").value(${amount});
+  # Run Keyword If    ${is_qualified}   Click Element   id=lcbBid_selfQualified
+  # Run Keyword If    ${is_eligible}    Click Element   id=lcbBid_selfEligible
+  Click Element                             ${bid_approve_button}
   sleep   3
   Wait Until Page Contains Element          xpath=(//*[@id='btn_public' and not(contains(@style,'display: none'))])
   Click Element       id=btn_public
