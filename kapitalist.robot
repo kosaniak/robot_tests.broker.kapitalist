@@ -103,7 +103,7 @@ ${tender.document.save.button}          css=[type="submit"]
 
 #Пошук тендеру по идентифікатору
 ${tenderSearchButton}            xpath=//*[@id="mainControl"]/a[1]
-${byTenderNumber}                xpath=//*[@class="container-fluid"]/div/a[2]
+${byTenderNumber}                xpath=//*[@class='row']/a[2]
 ${PrecurementNumber}             id=ProcurementNumber
 ${searchButton}                  id=search
 ${publicTenderButton}            xpath=//*[@type="submit"]
@@ -574,7 +574,7 @@ Debug
 # Виконано
 Отримати інформацію про tenderPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.startDate
-  ${return_value}=   convert_date_to_format    ${return_value}
+  # ${return_value}=   convert_date_to_format    ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -610,12 +610,13 @@ Debug
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.region
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.region
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -672,6 +673,13 @@ Debug
   Input Text                            ${answer.text.field}                 ${answer}
   Click Element                         ${answer.save.button}
   sleep   1
+
+  Отримати інформацію із документа
+  [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
+  ${doc_value}=  Run Keyword If   '${field_name}' == 'description'
+  ...     Get Text    xpath=(//span[contains(@class, 'description') and contains(@class, '${doc_id}')])
+  ...     ELSE    Get Text   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+  [Return]   ${doc_value}
 
 Подати цінову пропозицію
   [Arguments]  @{ARGUMENTS}   ${username}    ${tender_id}   ${test_bid_data}
@@ -855,12 +863,7 @@ Debug
 #   ${doc_value}=  Get Text   xpath=(//*[@id='pn_documentsContent_']/table[${document_index + 1}]//span[contains(@class, 'documentType')])
 #   [return]  ${doc_value}
 
-# Отримати інформацію із документа
-#   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
-#   ${doc_value}=  Run Keyword If   '${field_name}' == 'description'
-#   ...     Get Text    xpath=(//span[contains(@class, 'description') and contains(@class, '${doc_id}')])
-#   ...     ELSE    Get Text   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
-#   [Return]   ${doc_value}
+
 
 # # Виконано
 # Відповісти на запитання
