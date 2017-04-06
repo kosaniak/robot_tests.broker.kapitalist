@@ -42,8 +42,9 @@ ${locator.questions[0].description}                             css=[name="quest
 ${locator.questions[0].date}                                    css=[name="question.Date"]
 ${locator.questions[0].answer}                                  css=[name="question.Answer"]
 # ${locator.bids}
-${locator.cancellations[0].status}                               css=[name="Status"]
-${locator.cancellations[0].reason}                               css=[name="cancellation.Reason"]
+${locator.cancellations[0].status}                              css=[name="Status"]
+${locator.cancellations[0].reason}                              css=[name="cancellation.Reason"]
+${locator.document.title}                                       xpath=[@name="document.Title"]/a
 
 
 # Вхід в кабінет
@@ -93,6 +94,7 @@ ${DeliveryAddress_PostalCode}    id=DeliveryAddress_PostalCode
 ${DeliveryAddress_Street}        id=DeliveryAddress_Street
 ${item.deliveryAdress.longtitude}      id=DeliveryLocation_Longitude
 ${item.deliveryAdress.latitude}        id=DeliveryLocation_Latitude
+${item.additional.classification}      id=AdditionalClassificationsSelectedId
 ${itemSaveButton}                xpath=//*[@type="submit"]
 
 # Завантадення документу
@@ -190,6 +192,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${items_description}=   Get From Dictionary   ${items[0]}         description
   ${quantity}=          Get From Dictionary     ${items[0]}                        quantity
   ${cpv}=               Get From Dictionary     ${items[0].classification}         id
+  # ${dkpp_id}=           Get From Dictionary     ${items[0].additionalClassifications}      id
   ${unit}=              Get From Dictionary     ${items[0].unit}                   name
   ${latitude}=          Get From Dictionary     ${items[0].deliveryLocation}      latitude
   ${longitude}=         Get From Dictionary     ${items[0].deliveryLocation}      longitude
@@ -237,7 +240,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep  3
 
 # Додавання номенклатури Suite Setup
-  #!/usr/bin/env  Until Page Contains Element      ${addItemButton}                  10
+  Wait Until Page Contains Element     ${addItemButton}                  10
   Click Element                         ${addItemButton}
   Wait Until Page Contains Element      ${lotDescription}                 10
   Input Text                            ${lotDescription}                 ${items_description}
@@ -251,6 +254,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Execute Javascript                    location.href = "#${cpv}_anchor";
   Click Element                         id=${cpv}_anchor
   Sleep  1
+  # :IF "99999999-9"=="99999999-9"
+  # \  Input Text   ${item.additional.classification}   ${dkpp_id}
   # Execute Javascript                    location.href = "${unitCode}";
   # Sleep  1
   # Wait Until Element Is Visible         ${unitCode}                       10
@@ -674,11 +679,9 @@ Debug
   Click Element                         ${answer.save.button}
   sleep   1
 
-  Отримати інформацію із документа
+Отримати інформацію із документа
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
-  ${doc_value}=  Run Keyword If   '${field_name}' == 'description'
-  ...     Get Text    xpath=(//span[contains(@class, 'description') and contains(@class, '${doc_id}')])
-  ...     ELSE    Get Text   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+  ${doc_value}=  Отримати текст із поля і показати на сторінці   document.${field_name}
   [Return]   ${doc_value}
 
 Подати цінову пропозицію
