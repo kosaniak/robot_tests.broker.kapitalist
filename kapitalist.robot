@@ -44,7 +44,7 @@ ${locator.questions[0].answer}                                  css=[name="quest
 # ${locator.bids}
 ${locator.cancellations[0].status}                              css=[name="Status"]
 ${locator.cancellations[0].reason}                              css=[name="cancellation.Reason"]
-${locator.document.title}                                       xpath=[@name="document.Title"]/a
+${locator.document.title}                                       xpath=//*[@name="document.Title"]/a
 
 
 # Вхід в кабінет
@@ -679,13 +679,34 @@ Debug
   Click Element                         ${answer.save.button}
   sleep   1
 
+#Done
 Отримати інформацію із документа
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
   ${doc_value}=  Отримати текст із поля і показати на сторінці   document.${field_name}
-  [Return]   ${doc_value}
+  [Return]   ${doc_value.spli(' ')[0]}
+
+Отримати документ
+  [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
+  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+  Click Element   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+  sleep   3
+  ${file_name}=   Get Text    ${locator.document.title}
+  ${url}=   Get Element Attribute    ${locator.document.title}@href
+  download_file   ${url}  ${file_name.split(' ')[0]}  ${OUTPUT_DIR}
+  [return]  ${file_name.split(' ')[0]}
+
+Отримати інформацію із запитання
+  [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
+  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+  Перейти до сторінки запитань
+  ${return_value}=      Run Keyword If   '${field_name}' == 'title'
+  ...     Get Text    xpath=(//span[contains(@class, 'qa_title') and contains(@class, '${item_id}')])
+  ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
+  ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
+  [return]           ${return_value}
 
 Подати цінову пропозицію
-  [Arguments]  @{ARGUMENTS}   ${username}    ${tender_id}   ${test_bid_data}
+  [Arguments]   ${username}    ${tender_id}   ${test_bid_data}
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
@@ -813,6 +834,8 @@ Debug
   ${result}=    Get Text  id=aPosition_auctionUrl
   [return]   ${result}
 
+
+
 # Завантажити документ в тендер з типом
 #   [Arguments]  ${username}  ${tender_uaid}  ${filepath}  ${doc_type}
 #   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
@@ -886,15 +909,7 @@ Debug
 #   ${return_value}=    Convert To Number  ${return_value}
 #   [return]            ${return_value}
 
-# Отримати інформацію із запитання
-#   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
-#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-#   Перейти до сторінки запитань
-#   ${return_value}=      Run Keyword If   '${field_name}' == 'title'
-#   ...     Get Text    xpath=(//span[contains(@class, 'qa_title') and contains(@class, '${item_id}')])
-#   ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
-#   ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
-#   [return]           ${return_value}
+
 
 # Задати запитання на тендер
 #   [Arguments]  ${username}  ${tender_uaid}  ${question}
@@ -938,15 +953,6 @@ Debug
 #   ${tender_doc_number}=   Get Matching Xpath Count   xpath=(//*[@id='pn_documentsContent_']/table)
 #   [Return]  ${tender_doc_number}
 
-# Отримати документ
-#   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
-#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-#   Click Element   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
-#   sleep   3
-#   ${file_name}=   Get Text    xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
-#   ${url}=   Get Element Attribute    xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])@href
-#   download_file   ${url}  ${file_name.split('/')[-1]}  ${OUTPUT_DIR}
-#   [return]  ${file_name.split('/')[-1]}
 
 # Отримати дані із документу пропозиції
 #   [Arguments]  ${username}  ${tender_uaid}  ${bid_index}  ${document_index}  ${field}
