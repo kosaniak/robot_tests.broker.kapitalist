@@ -55,13 +55,13 @@ ${submitButton}                  xpath=//*[@type="submit"]
 ${createTenderButton}            xpath=//*[@id="mainControl"]/a[2]
 #Тип тендеру - Допорогові закупівлі
 ${typeOfAdvertisementLink}       xpath=//* [text()="Допорогові закупівлі"]
-${tender.title}                  css=#Title
-${tender.description}            css=#Description
+${tender.title}                  id=Title
+${edit.description}                   id=Description
 ${turnOnPdvCheckBox}             id=Value_VATIncluded
 ${questionStartDate}             id=EnquiryPeriod_StartDate_Local
 ${questionEndDate}               id=EnquiryPeriod_EndDate_Local
 ${tenderPeriodStartDate}         id=TenderPeriod_StartDate_Local
-${tenderPeriodEndDate}           id=TenderPeriod_EndDate_Local
+${edit.tenderPeriod.endDate}          id=TenderPeriod_EndDate_Local
 ${saveButton}                    xpath=//*[@type="submit"]
 
 #Вхід до кабінету
@@ -111,7 +111,7 @@ ${searchButton}                  id=search
 ${publicTenderButton}            xpath=//*[@type="submit"]
 
 #Питання
-${addQuestionButton}             xpath=//*[@id="general"]/div/fieldset[1]/a[4]
+${addQuestionButton}             xpath=//*[@class="col-md-12"]/a
 ${QuestionTitle}                 id=Title
 ${QuestionDescription}           id=Description
 ${saveQuestionButton}            xpath=//*[@type="submit"]
@@ -199,11 +199,13 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${postalCode}=        Get From Dictionary     ${items[0].deliveryAddress}       postalCode
   ${streetAddress}=     Get From Dictionary     ${items[0].deliveryAddress}       streetAddress
   ${deliveryDate}=      Get From Dictionary     ${items[0].deliveryDate}          endDate
-  # ${deliveryDate}=      convert_date_to_format        ${deliveryDate}
-  ${enquiryPeriod}=   Get From Dictionary   ${tender_data.data}               enquiryPeriod
-  ${enquiry_end_date}=   get_all_dates   ${tender_data}         EndPeriod          date
-  ${start_date}=         get_all_dates   ${tender_data}         StartDate          date
-  ${end_date}=           get_all_dates   ${tender_data}         EndDate            date
+  ${deliveryDate}=      convert_date_to_format        ${deliveryDate}
+  ${tenderPeriod}=   Get From Dictionary   ${tender_data.data}               tenderPeriod
+  # ${enquiry_end_date}=   Get From Dictionary   ${tender_data.data.enquiryPeriod}         EndPeriod
+  # ${enquiry_end_date}=   convert_date_to_format   ${enquiry_end_date}
+  ${enquiry_end_date}=   get_all_dates   ${tender_data}         EndPeriod
+  ${start_date}=         get_all_dates   ${tender_data}         StartDate
+  ${end_date}=           get_all_dates   ${tender_data}         EndDate
 
   Selenium2Library.Switch Browser     ${username}
   Wait Until Page Contains Element    ${createTenderButton}                               10
@@ -211,19 +213,19 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep  3
   Click Element                       ${typeOfAdvertisementLink}
   Input text                          ${tender.title}                               ${title}
-  Input text                          ${tender.description}                         ${description}
+  Input text                          ${edit.description}                         ${description}
 #  Чек бокс для включення/відключення ПДВ (при необхідності закоментувати)
   Click Element                       ${turnOnPdvCheckBox}
   Sleep  3
-  # Input text                          ${questionStartDate}                              ${enquiryPeriod}
   Input text                          ${questionEndDate}                                ${enquiry_end_date}
   Sleep  3
   Input text                          ${tenderPeriodStartDate}                          ${start_date}
   Sleep  3
-  Input text                          ${tenderPeriodEndDate}                            ${end_date}
+  Input text                          ${edit.tenderPeriod.endDate}                       ${end_date}
   Click Element                       ${saveButton}
 #  Створена чернетка допорогового тендеру
   Sleep  1
+
 
 # Додавання лоту
 #Додати Предмет
@@ -252,15 +254,10 @@ ${cancelation.submit.button}     css=[type="submit"]
   Input Text                            ${searchCPV}                      ${cpv}
   Sleep  1
   Execute Javascript                    location.href = "#${cpv}_anchor";
-  Click Element                         id=${cpv}_anchor
+  Click Element             id=${cpv}_anchor
   Sleep  1
-  # :IF "99999999-9"=="99999999-9"
-  # \  Input Text   ${item.additional.classification}   ${dkpp_id}
-  # Execute Javascript                    location.href = "${unitCode}";
-  # Sleep  1
-  # Wait Until Element Is Visible         ${unitCode}                       10
-  # Click Element                         ${unitCode}
-  # Select From List                      xpath=//*[@calss="chosen-results"]     ${unit}
+  Run Keyword If   '${cpv}' == '99999999-9'
+  ...   Input Text   ${item.additional.classification}      1232123
   Execute Javascript                     $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
   # Click Element                         ${unitCode}
   # Sleep   2
@@ -289,13 +286,12 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${Ids}=   Convert To String         ${tender_UAid}
   log to console      ${Ids}
   Log   ${Ids}
-#  Run keyword if   '${mode}' == 'multi'   Set Multi Ids   ${ARGUMENTS[0]}   ${tender_UAid}
+  Run keyword if   '${mode}' == 'multi'   Set Multi Ids   ${username}   ${tender_UAid}
   [return]  ${Ids}
-Debug
 
 #Виконано
 Додати предмет
-  [Arguments]
+  [Arguments]   ${items}   ${index}
   [Documentation]
   ...      ${ARGUMENTS[0]} ==  items
   ...      ${ARGUMENTS[1]} ==  ${INDEX}
@@ -474,6 +470,7 @@ Debug
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
   ${return_value}=   Convert to Number   ${return_value.split(' ')[0].replace(',', '.')}
+  # ${return_value}=   string_to_float   ${return_value.split(' ')[0].replace(',', '.')}
   [return]           ${return_value}
 
 # Виконано
@@ -484,7 +481,7 @@ Debug
 
 # Виконано
 Внести зміни в тендер
-  [Arguments]   ${username}   ${tender_uaId}   ${field_value}   ${field_name}
+  [Arguments]   ${username}   ${tender_uaId}   ${field_name}   ${field_value}
    [Documentation]
   ...      ${ARGUMENTS[0]} =  username
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
@@ -494,11 +491,14 @@ Debug
   Sleep   2
   Click Element   xpath=//*[@id="general"]/div/fieldset[1]/div[2]/a[1]
   Sleep   2
-  Input Text       ${locator.${field_name}}         ${field_value}
-  Click Element   css=[type="submit"]
+  Input Text        ${edit.${field_name}}         ${field_value}
+  Click Element     css=[type="submit"]
   Sleep   3
-  ${result_field}=  run keyword  kapitalist.Отримати інформацію про ${field_name}
-  Should Be Equal   ${result_field}             ${field_value}
+  ${result_field}=   run keyword  kapitalist.Отримати інформацію про ${field_name}
+  Run Keyword If   '${field_name}' == 'tenderPeriod.endDate'
+  # ...   convert_date_to_format   ${field_value}
+  ...   Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
+  Should Be Equal   ${result_field}   ${field_value}
 
 # Виконано
 Отримати інформацію про items[${index}].quantity
@@ -510,7 +510,6 @@ Debug
 Отримати інформацію про items[${index}].unit.code
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[${index}].unit.code
   ${return_value}=   Convert To String     ${return_value}
-  # ${return_value}=   Convert To String    KGM
   [return]  ${return_value}
 
 # Виконано
@@ -615,13 +614,13 @@ Debug
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.region
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.region
-  ${return_value}=   convert_string_to_common_string   ${return_value}
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
-  ${return_value}=   convert_string_to_common_string   ${return_value}
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -632,13 +631,13 @@ Debug
 # Внесені правки
 Отримати інформацію про items[0].deliveryDate.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
-  # ${return_value}=   convert_datetime_for_delivery    ${return_value}
+  # ${return_value}=   convert_date_to_format    ${return_value}
   [return]           ${return_value}
 
   # Внесені правки
 Отримати інформацію про items[0].deliveryDate.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
-  # ${return_value}=   convert_datetime_for_delivery    ${return_value}
+  # ${return_value}=   convert_date_to_format    ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -673,6 +672,7 @@ Debug
   ${answer}=     Get From Dictionary  ${ARGUMENTS[3].data}   answer
   kapitalist.Пошук тендера по ідентифікатору        ${ARGUMENTS[0]}          ${ARGUMENTS[1]}
   Reload Page
+  Sleep   1
   Wait Until Page Contains Element      ${answerQuestionButton}
   Click Element                         ${answerQuestionButton}
   Input Text                            ${answer.text.field}                 ${answer}
@@ -682,17 +682,17 @@ Debug
 #Done
 Отримати інформацію із документа
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
-  ${doc_value}=  Отримати текст із поля і показати на сторінці   document.${field_name}
-  [Return]   ${doc_value.spli(' ')[0]}
+  ${return_value}=  Отримати текст із поля і показати на сторінці   document.${field_name}
+  [return]   ${return_value}
 
 Отримати документ
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Click Element   xpath=(//a[contains(@class, 'doc_title') and contains(@class, '${doc_id}')])
+  Click Element   xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]
   sleep   3
-  ${file_name}=   Get Text    ${locator.document.title}
-  ${url}=   Get Element Attribute    ${locator.document.title}@href
-  download_file   ${url}  ${file_name.split(' ')[0]}  ${OUTPUT_DIR}
+  ${file_name}=   Get Text    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]
+  # ${url}=   Get Element Attribute    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]@href
+  # download_file   ${url}   ${file_name.split(' ')[0]}   ${OUTPUT_DIR}
   [return]  ${file_name.split(' ')[0]}
 
 Отримати інформацію із запитання
@@ -700,10 +700,21 @@ Debug
   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
   Перейти до сторінки запитань
   ${return_value}=      Run Keyword If   '${field_name}' == 'title'
-  ...     Get Text    xpath=(//span[contains(@class, 'qa_title') and contains(@class, '${item_id}')])
+  ...     Get Text    xpath=(//*[@name="") and contains(@class, '${item_id}')])
   ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
   ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
   [return]           ${return_value}
+
+# Виконано
+Відповісти на запитання
+  [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
+  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+  Перейти до сторінки запитань
+  Wait Until Page Contains Element      ${answerQuestionButton}
+  Click Element                         ${answerQuestionButton}
+  Input Text                            id=e_answer                             ${answer_data.data.answer}
+  Click Element                         id=SendAnswer
+  sleep   1
 
 Подати цінову пропозицію
   [Arguments]   ${username}    ${tender_id}   ${test_bid_data}
@@ -891,17 +902,6 @@ Debug
 
 
 
-# # Виконано
-# Відповісти на запитання
-#   [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
-#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-#   Перейти до сторінки запитань
-#   Wait Until Page Contains Element      ${answerQuestionButton}
-#   Click Element                         ${answerQuestionButton}
-#   Input Text                            id=e_answer        ${answer_data.data.answer}
-#   Click Element                         id=SendAnswer
-#   sleep   1
-
 # Отримати кількість предметів в тендері
 #   [Arguments]  ${username}  ${tender_uaid}
 #   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
@@ -1026,3 +1026,4 @@ Debug
   kapitalist.Завантажити угоду до тендера   ${username}  ${tender_uaid}  1  ${filepath}
   Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
   Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//span[contains(@class, 'contract_register')])
+
