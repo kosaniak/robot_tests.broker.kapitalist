@@ -68,10 +68,20 @@ def get_tender_id(str_tender_id):
     return str_tender_id
 
 
-def adapt_procuringEntity(tender_data):
+def adapt_tender_data(tender_data):
+    enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
+    enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
+    tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     tender_data['data']['procuringEntity']['name'] = u"qa_test"
     return tender_data
 
 
 def remove_first_word(str):
     return str.lstrip(str.split(' ')[0]+' ')
+
+def get_time_with_offset(date):
+    date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M")
+    time_zone = timezone('Europe/Kiev')
+    localized_date = time_zone.localize(date_obj)
+    return localized_date.strftime('%Y-%m-%d %H:%M:%S.%f%z')
+

@@ -141,7 +141,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 #Виконано
 Підготувати дані для оголошення тендера
   [Arguments]    ${username}    ${tender_data}     ${role_name}
-  ${tender_data}=    adapt_procuringEntity    ${tender_data}
+  ${tender_data}=    adapt_tender_data    ${tender_data}
   [Return]    ${tender_data}
 
 #Виконано
@@ -578,7 +578,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про tenderPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.startDate
-  # ${return_value}=   convert_date_to_format    ${return_value}
+  ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -1026,4 +1026,5 @@ ${cancelation.submit.button}     css=[type="submit"]
   kapitalist.Завантажити угоду до тендера   ${username}  ${tender_uaid}  1  ${filepath}
   Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
   Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//span[contains(@class, 'contract_register')])
+
 
