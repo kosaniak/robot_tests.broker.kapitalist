@@ -3,6 +3,9 @@ import string
 
 from iso8601 import parse_date
 import dateutil.parser
+from datetime import datetime, timedelta
+from pytz import timezone
+from dateutil import parser
 
 
 def get_all_dates(initial_tender_data, key):
@@ -37,7 +40,7 @@ def convert_time_to_format(isodate):
 
 
 def string_to_float(string):
-    return float(string)
+    return format(string, '.2f')
 
 
 def change_data(initial_data):
@@ -69,6 +72,9 @@ def get_tender_id(str_tender_id):
 
 
 def adapt_tender_data(tender_data):
+    tenderPeriod_startDate = parser.parse(tender_data['tenderPeriod']['startDate'])
+    tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
+    tender_data["tenderPeriod"]["startDate"] = tenderPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
     enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
     tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
@@ -85,3 +91,9 @@ def get_time_with_offset(date):
     localized_date = time_zone.localize(date_obj)
     return localized_date.strftime('%Y-%m-%d %H:%M:%S.%f%z')
 
+
+def download_document_from_url(url, path_to_save_file):
+    f = open(path_to_save_file, 'wb')
+    f.write(urllib.urlopen(url).read())
+    f.close()
+    return os.path.basename(f.name)
