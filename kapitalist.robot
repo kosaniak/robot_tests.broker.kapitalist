@@ -112,7 +112,7 @@ ${searchButton}                  id=search
 ${publicTenderButton}            xpath=//*[@type="submit"]
 
 #Питання
-${addQuestionButton}             xpath=//*[@class="col-md-12"]/a
+${addQuestionButton}             xpath=//a[contains(@href, 'addQuestion')]
 ${QuestionTitle}                 id=Title
 ${QuestionDescription}           id=Description
 ${saveQuestionButton}            xpath=//*[@type="submit"]
@@ -143,7 +143,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 #Виконано
 Підготувати дані для оголошення тендера
   [Arguments]    ${username}    ${tender_data}     ${role_name}
-  ${tender_data}=    adapt_tender_data    ${tender_data.data}
+  ${tender_data.data}=    adapt_tender_data    ${tender_data.data}
   [Return]    ${tender_data}
 
 #Виконано
@@ -497,9 +497,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element     css=[type="submit"]
   Sleep   3
   ${result_field}=   run keyword  kapitalist.Отримати інформацію про ${field_name}
-  Run Keyword If   '${field_name}' == 'tenderPeriod.endDate'
+  ${result_field}=   Run Keyword If   '${field_name}' == 'tenderPeriod.endDate'
   ...   convert_date_to_format   ${field_value}
-  ...   Should Be Equal   ${result_field}    ${field_value}
   Should Be Equal   ${result_field}   ${field_value}
 
 # Виконано
@@ -692,7 +691,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   sleep   3
   ${file_name}=   Get Text    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]
   ${url}=   Get Element Attribute    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]@href
-  download_document_from_url   ${url}    '//test_out'
+  download_document_from_url   ${url}    ${OUTPUT_DIR}
   [return]  ${file_name}
 
 Отримати інформацію із запитання
@@ -704,6 +703,12 @@ ${cancelation.submit.button}     css=[type="submit"]
   ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
   ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
   [return]           ${return_value}
+
+Задати запитання на тендер
+  [Arguments]  ${username}  ${tender_uaid}  ${question}
+  kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  Задати питання   ${username}    ${tender_uaid}     ${question}
+
 
 # Виконано
 Відповісти на запитання
@@ -909,11 +914,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 #   [return]            ${return_value}
 
 
-
-# Задати запитання на тендер
-#   [Arguments]  ${username}  ${tender_uaid}  ${question}
-#   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
-#   Задати питання   ${username}    ${tender_uaid}     ${question}
 
 # Задати запитання на предмет
 #   [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${question}
