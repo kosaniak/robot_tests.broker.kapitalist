@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -
 import string
+import urllib
+import urllib2
 
 from iso8601 import parse_date
 import dateutil.parser
@@ -27,26 +29,16 @@ def convert_date_to_format(isodate):
     return date_string
 
 
-def convert_datetime_for_delivery(isodate):
-    iso_dt = parse_date(isodate)
-    date_string = iso_dt.strftime("%Y.%m.%d %H:%M")
+def convert_datetime_to_iso(isodate):
+    dt = dateutil.parser(isodate)
+    date_string= dt.strftime("%Y-%m-%d %H:%M")
     return date_string
 
 
-def convert_time_to_format(isodate):
-    iso_dt = parse_date(isodate)
-    time_string = iso_dt.strftime("%H:%M")
-    return time_string
-
 
 def string_to_float(string):
-    return format(string, '.2f')
+    return format(string, '.1f')
 
-
-def change_data(initial_data):
-    initial_data['data']['items'][0]['deliveryAddress']['locality'] = u"м. Київ"
-    initial_data['data']['items'][0]['deliveryAddress']['region'] = u"Київська область"
-    return initial_data
 
 
 def convert_string_to_common_string(string):
@@ -72,13 +64,13 @@ def get_tender_id(str_tender_id):
 
 
 def adapt_tender_data(tender_data):
+    tender_data['data']['procuringEntity']['name'] = u"qa_test"
     tenderPeriod_startDate = parser.parse(tender_data['tenderPeriod']['startDate'])
     tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
     tender_data["tenderPeriod"]["startDate"] = tenderPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
     enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
     tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
-    tender_data['data']['procuringEntity']['name'] = u"qa_test"
     return tender_data
 
 

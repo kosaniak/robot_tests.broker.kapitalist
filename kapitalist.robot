@@ -116,7 +116,7 @@ ${addQuestionButton}             xpath=//a[contains(@href, 'addQuestion')]
 ${QuestionTitle}                 id=Title
 ${QuestionDescription}           id=Description
 ${saveQuestionButton}            xpath=//*[@type="submit"]
-${answerQuestionButton}          xpath=//*[contains(@href, '/addAnswer')]
+${answerQuestionButton}          xpath=//*[contains(@href, 'addAnswer')]
 ${answer.text.field}             id=Answer
 ${answer.save.button}            css=[type="submit"]
 
@@ -143,7 +143,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 #Виконано
 Підготувати дані для оголошення тендера
   [Arguments]    ${username}    ${tender_data}     ${role_name}
-  ${tender_data.data}=    adapt_tender_data    ${tender_data.data}
+  ${tender_data}=    adapt_tender_data    ${tender_data}
   [Return]    ${tender_data}
 
 #Виконано
@@ -472,7 +472,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
   ${return_value}=   Convert to Number   ${return_value.split(' ')[0].replace(',', '.')}
-  # ${return_value}=   string_to_float   ${return_value.split(' ')[0].replace(',', '.')}
+  ${return_value}=   string_to_float   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -498,8 +498,9 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep   3
   ${result_field}=   run keyword  kapitalist.Отримати інформацію про ${field_name}
   ${result_field}=   Run Keyword If   '${field_name}' == 'tenderPeriod.endDate'
-  ...   convert_date_to_format   ${field_value}
-  Should Be Equal   ${result_field}   ${field_value}
+  # ...   convert_date_to_format   ${field_value}
+  ...   Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
+  Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
 
 # Виконано
 Отримати інформацію про items[${index}].quantity
@@ -579,6 +580,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про tenderPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.startDate
+  ${return_value}=   convert_datetime_to_iso    ${return_value}
   ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
@@ -590,6 +592,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про enquiryPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   enquiryPeriod.startDate
+  ${return_value}=   convert_datetime_to_iso    ${return_value}
   ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
@@ -722,13 +725,13 @@ ${cancelation.submit.button}     css=[type="submit"]
   sleep   1
 
 Подати цінову пропозицію
-  [Arguments]   ${username}    ${tender_id}   ${test_bid_data}   ${lots_ids}=None   ${features_ids}=None
+  [Arguments]   ${username}    ${tender_id}   ${test_bid_data}
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
   ...    ${ARGUMENTS[2]} ==  ${test_bid_data}
   ${amount}=    Get From Dictionary     ${test_bid_data.data.value}         amount
-  kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
+  # kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
   Wait Until Page Contains Element          ${bid_take_part_button}
   Click Element                             ${bid_take_part_button}
   Sleep   3
