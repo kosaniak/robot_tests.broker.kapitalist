@@ -25,7 +25,7 @@ ${locator.items[0].description}                                 xpath=//*[@name=
 ${locator.items[0].deliveryDate.startDate}                      xpath=//*[@name="item.DeliveryDate"]/span[1]
 ${locator.items[0].deliveryDate.endDate}                        xpath=//*[@name="item.DeliveryDate"]/span[2]
 ${locator.items[0].additionalClassifications[0].description}    css=[name="item.AdditionalClassifications"]
-${locator.items[0].additionalClassifications[0].id}    css=[name="item.AdditionalClassifications"]
+${locator.items[0].additionalClassifications[0].id}             css=[name="item.AdditionalClassifications"]
 ${locator.items[0].deliveryLocation.longitude}
 ${locator.items[0].deliveryAddress.postalCode}                  css=[name="item.DeliveryAddress.PostalCode"]
 ${locator.items[0].deliveryAddress.countryName}                 css=[name="item.DeliveryAddress.Country"]
@@ -143,7 +143,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 #Виконано
 Підготувати дані для оголошення тендера
   [Arguments]    ${username}    ${tender_data}     ${role_name}
-  ${tender_data}=    adapt_tender_data    ${tender_data}
+  # ${tender_data}=    adapt_tender_data    ${tender_data}
   [Return]    ${tender_data}
 
 #Виконано
@@ -191,8 +191,9 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${description}=       Get From Dictionary     ${tender_data.data}               description
   ${budget}=            Get From Dictionary     ${tender_data.data.value}          amount
   ${step_rate}=         Get From Dictionary     ${tender_data.data.minimalStep}   amount
-  ${items_description}=   Get From Dictionary   ${items[0]}         description
-  ${quantity}=          Get From Dictionary     ${items[0]}                        quantity
+  ${items_title}=       Get From Dictionary     ${items[0]}                       title
+  ${items_description}=   Get From Dictionary   ${items[0]}                       description
+  ${quantity}=          Get From Dictionary     ${items[0]}                       quantity
   ${cpv}=               Get From Dictionary     ${items[0].classification}         id
   # ${dkpp_id}=           Get From Dictionary     ${items[0].additionalClassifications}      id
   ${unit}=              Get From Dictionary     ${items[0].unit}                   name
@@ -203,8 +204,6 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${deliveryDate}=      Get From Dictionary     ${items[0].deliveryDate}          endDate
   ${deliveryDate}=      convert_date_to_format        ${deliveryDate}
   ${tenderPeriod}=   Get From Dictionary   ${tender_data.data}               tenderPeriod
-  # ${enquiry_end_date}=   Get From Dictionary   ${tender_data.data.enquiryPeriod}         EndPeriod
-  # ${enquiry_end_date}=   convert_date_to_format   ${enquiry_end_date}
   ${enquiry_end_date}=   get_all_dates   ${tender_data}         EndPeriod
   ${start_date}=         get_all_dates   ${tender_data}         StartDate
   ${end_date}=           get_all_dates   ${tender_data}         EndDate
@@ -234,8 +233,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Wait Until Page Contains Element      ${addLot}
   click element                         ${addLot}
   Wait Until Page Contains Element      ${lotHeader}
-  Input text                            ${lotHeader}                      ${title}
-  Input text                            ${lotDescription}                 ${description}
+  Input text                            ${lotHeader}                      ${items_title}
+  Input text                            ${lotDescription}                 ${items_description}
   Sleep  3
   Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${budget});
   Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${budget});
@@ -259,19 +258,15 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element             id=${cpv}_anchor
   Sleep  1
   Run Keyword If   '${cpv}' == '99999999-9'
-  ...   Input Text   ${item.additional.classification}      1232123
-  Execute Javascript                     $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
-  # Click Element                         ${unitCode}
-  # Sleep   2
+  ...   Input Text   ${item.additional.classification}      ${items[0].additionalClassifications}
+  Execute Javascript                    $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
   Input Text                            ${unitName}                       ${unit}
-  # Click Element                         ${unit.active.result}
   Press Key                             ${unitName}                       \\\13
   Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
   # Input Text                            ${deliveryAddressCountry}         Україна
   Input Text                            ${DeliveryAddress.Region}         Київська область
-  # Press Key                             ${DeliveryAddress.Region}         \\\13
   Input Text                            ${DeliveryAddress.City}           м. Київ
   Input Text                            ${DeliveryAddress_PostalCode}     ${postalCode}
   Input Text                            ${DeliveryAddress_Street}         ${streetAddress}
@@ -425,6 +420,14 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${return_value}=  Run Keyword And Return  kapitalist.Отримати інформацію із тендера  ${username}  ${tender_uaid}  ${field_name}
   [return]           ${return_value}
 
+Отримати інформацію із лоту
+
+  [Arguments]   ${username}   ${tender_uaid}   ${lot_id}   ${field_name}
+  [Documentation]
+  ...   Отримати значення поля field_name з лоту з lot_id в описі для тендера tender_uaid.
+  ${return_value}=  Run Keyword  Отримати інформацію про ${field_name}
+  [Return]  ${return_value}
+
 # Виконано
 Отримати інформацію із тендера
   [Arguments]  ${username}     ${tender_data}    ${fieldname}
@@ -498,9 +501,10 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep   3
   ${result_field}=   run keyword  kapitalist.Отримати інформацію про ${field_name}
   ${result_field}=   Run Keyword If   '${field_name}' == 'tenderPeriod.endDate'
-  # ...   convert_date_to_format   ${field_value}
-  ...   Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
-  Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
+  ...   convert_date_to_format   ${field_value}
+  ...   ELSE   ${field_value}
+  # ...   Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
+  Should Be Equal   ${result_field}    ${field_value}
 
 # Виконано
 Отримати інформацію про items[${index}].quantity
@@ -605,7 +609,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.countryName
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.countryName
-  ${return_value}=   convert_string_to_common_string   ${return_value}
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано

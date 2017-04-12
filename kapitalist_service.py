@@ -29,10 +29,9 @@ def convert_date_to_format(isodate):
     return date_string
 
 
-def convert_datetime_to_iso(isodate):
-    dt = dateutil.parser(isodate)
-    date_string= dt.strftime("%Y-%m-%d %H:%M")
-    return date_string
+def convert_datetime_to_iso(date):
+    date = datetime.strptime(date, "%d.%m.%Y %H:%M")
+    return timezone('Europe/Kiev').localize(date).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
 
 
@@ -66,10 +65,10 @@ def get_tender_id(str_tender_id):
 def adapt_tender_data(tender_data):
     tender_data['data']['procuringEntity']['name'] = u"qa_test"
     tenderPeriod_startDate = parser.parse(tender_data['tenderPeriod']['startDate'])
-    tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
+    # tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
     tender_data["tenderPeriod"]["startDate"] = tenderPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
-    enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
+    # enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
     tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     return tender_data
 
