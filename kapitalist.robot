@@ -124,7 +124,7 @@ ${addQuestionButton}             xpath=//a[contains(@href, 'addQuestion')]
 ${QuestionTitle}                 id=Title
 ${QuestionDescription}           id=Description
 ${saveQuestionButton}            xpath=//*[@type="submit"]
-${answerQuestionButton}          xpath=//*[contains(@href, 'addAnswer')]
+${answer.button}                 xpath=//*[contains(@href, 'addAnswer')]
 ${answer.text.field}             id=Answer
 ${answer.save.button}            css=[type="submit"]
 
@@ -135,6 +135,8 @@ ${bid_lot_value}                     id=Lots_c6a6d754-6ccc-48f4-b4f6-37a59c90f44
 ${bid_add_document}                  id=files
 ${bid_approve_button}                xpath=//*[@type="submit"]
 ${bids.tab}                          xpath=//a[@href="#bids"]
+${cancelation.bid}                   css=[title="Відмінити пропозицію"]
+${edit.bid.button}                   xpath=//a[contains(@onclick, '_edit')]
 
 
 
@@ -505,7 +507,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
   ${return_value}=   Convert to Number   ${return_value.split(' ')[0].replace(',', '.')}
-  ${return_value}=   string_to_float   ${return_value}
+  # ${return_value}=   string_to_float   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -746,22 +748,22 @@ ${cancelation.submit.button}     css=[type="submit"]
   [return]           ${return_value}
 
 # Виконано
-Відповісти на питання
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} = username
-  ...      ${ARGUMENTS[1]} = ${TENDER_UAID}
-  ...      ${ARGUMENTS[2]} = 0
-  ...      ${ARGUMENTS[3]} = answer_data
-  ${answer}=     Get From Dictionary  ${ARGUMENTS[3].data}   answer
-  kapitalist.Пошук тендера по ідентифікатору        ${ARGUMENTS[0]}          ${ARGUMENTS[1]}
-  Reload Page
-  Sleep   1
-  Wait Until Page Contains Element      ${answerQuestionButton}
-  Click Element                         ${answerQuestionButton}
-  Input Text                            ${answer.text.field}                 ${answer}
-  Click Element                         ${answer.save.button}
-  sleep   1
+# Відповісти на питання
+#   [Arguments]  @{ARGUMENTS}
+#   [Documentation]
+#   ...      ${ARGUMENTS[0]} = username
+#   ...      ${ARGUMENTS[1]} = ${TENDER_UAID}
+#   ...      ${ARGUMENTS[2]} = 0
+#   ...      ${ARGUMENTS[3]} = answer_data
+#   ${answer}=     Get From Dictionary  ${ARGUMENTS[3].data}   answer
+#   kapitalist.Пошук тендера по ідентифікатору        ${ARGUMENTS[0]}          ${ARGUMENTS[1]}
+#   Reload Page
+#   Sleep   1
+#   Wait Until Page Contains Element      ${answer.button}             5
+#   Click Element                         ${answer.button}
+#   Input Text                            ${answer.text.field}                 ${answer}
+#   Click Element                         ${answer.save.button}
+#   sleep   1
 
 #Done
 Отримати інформацію із документа
@@ -776,7 +778,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   sleep   3
   ${file_name}=   Get Text    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]
   ${url}=   Get Element Attribute    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]@href
-  download_document_from_url   ${url}    ${OUTPUT_DIR}
+  download_document_from_url   ${url}   ${file_name}   ${OUTPUT_DIR}
   [return]  ${file_name}
 
 Отримати інформацію із запитання
@@ -791,15 +793,15 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 
 # Виконано
-Відповісти на запитання
-  [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Перейти до сторінки запитань
-  Wait Until Page Contains Element      ${answerQuestionButton}
-  Click Element                         ${answerQuestionButton}
-  Input Text                            id=e_answer                             ${answer_data.data.answer}
-  Click Element                         id=SendAnswer
-  sleep   1
+# Відповісти на запитання
+#   [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
+#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#   Перейти до сторінки запитань
+#   Wait Until Page Contains Element      ${answer.button}
+#   Click Element                         ${answer.button}
+#   Input Text                            id=e_answer                             ${answer_data.data.answer}
+#   Click Element                         id=SendAnswer
+#   sleep   1
 
 Подати цінову пропозицію
   [Arguments]   ${username}    ${tender_id}   ${test_bid_data}   ${lots_ids}=${None}   ${features_ids}=${None}
@@ -807,7 +809,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
   ...    ${ARGUMENTS[2]} ==  ${test_bid_data}
-  ${amount}=    Get From Dictionary     ${test_bid_data.data.value}         amount
+  ${amount}=    Get From Dictionary     ${test_bid_data.data.lotValues[0].value}         amount
   # kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
   Wait Until Page Contains Element          ${bid_take_part_button}
   Click Element                             ${bid_take_part_button}
@@ -831,12 +833,16 @@ ${cancelation.submit.button}     css=[type="submit"]
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
+.. Log Many
   kapitalist.Пошук тендера по ідентифікатору  ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
   Wait Until Page Contains Element   ${bids.tab}
   Click Element       ${bids.tab}
   Sleep   3
-  Wait Until Page Contains Element   xpath=(//*[@id='btn_delete' and not(contains(@style,'display: none'))])
-  Click Element       id=btn_delete
+  Wait Until Page Contains Element   ${cancelation.bid}
+  Click Element       ${cancelation.bid}
+  Select Window   id=form0
+  Click Element   css=[type="submit"]
+
 
 Отримати інформацію із пропозиції
   [Arguments]  ${username}  ${tender_uaid}   ${field}

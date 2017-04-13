@@ -83,8 +83,5 @@ def get_time_with_offset(date):
     return localized_date.strftime('%Y-%m-%d %H:%M:%S.%f%z')
 
 
-def download_document_from_url(url, path_to_save_file):
-    f = open(path_to_save_file, 'wb')
-    f.write(urllib.urlopen(url).read())
-    f.close()
-    return os.path.basename(f.name)
+def download_document_from_url(url, file_name, output_dir):
+    urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
