@@ -21,6 +21,14 @@ ${locator.tenderPeriod.startDate}                               xpath=//*[@name=
 ${locator.tenderPeriod.endDate}                                 xpath=//*[@name="TenderPeriod"]/span[2]
 ${locator.enquiryPeriod.startDate}                              xpath=//*[@name="EnquiryPeriod"]/span[1]
 ${locator.enquiryPeriod.endDate}                                xpath=//*[@name="EnquiryPeriod"]/span[2]
+${locator.lots[0].title}                                        xpath=//*[@name="lot.Title"]
+${locator.lots[0].description}                                  xpath=//*[@name="lot.Description"]
+${locator.lots[0].value.amount}                                 xpath=//*[@name="lot.Value.Amount"]
+${locator.lots[0].value.currency}                               xpath=//*[@name="lot.Value.Amount"]
+${locator.lots[0].value.valueAddedTaxIncluded}                  xpath=//*[@name="lot.Value.Amount"]
+${locator.lots[0].minimalStep.currency}                         xpath=//*[@name="lot.MinimalStep.Amount"]
+${locator.lots[0].minimalStep.amount}                           xpath=//*[@name="lot.MinimalStep.Amount"]
+${locator.lots[0].minimalStep.valueAddedTaxIncluded}            xpath=//*[@name="lot.MinimalStep.Amount"]
 ${locator.items[0].description}                                 xpath=//*[@name="item.Description"]
 ${locator.items[0].deliveryDate.startDate}                      xpath=//*[@name="item.DeliveryDate"]/span[1]
 ${locator.items[0].deliveryDate.endDate}                        xpath=//*[@name="item.DeliveryDate"]/span[2]
@@ -38,7 +46,7 @@ ${locator.items[0].classification.description}                  css=[name="item.
 ${locator.items[0].unit.name}                                   css=[name="item.Quantity"]
 ${locator.items[0].unit.code}                                   css=[name="item.Unit.Code"]
 ${locator.items[0].quantity}                                    css=[name="item.Quantity"]
-${locator.questions[0].title}                                   css=[name="question.Title"]
+${locator.questions[0].title}                                   name=question.Title
 ${locator.questions[0].description}                             css=[name="question.Description"]
 ${locator.questions[0].date}                                    css=[name="question.Date"]
 ${locator.questions[0].answer}                                  css=[name="question.Answer"]
@@ -191,7 +199,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${description}=       Get From Dictionary     ${tender_data.data}               description
   ${budget}=            Get From Dictionary     ${tender_data.data.value}          amount
   ${step_rate}=         Get From Dictionary     ${tender_data.data.minimalStep}   amount
-  ${items_title}=       Get From Dictionary     ${items[0]}                       title
+  ${items_title}=       Get From Dictionary     ${items[0]}                       description
   ${items_description}=   Get From Dictionary   ${items[0]}                       description
   ${quantity}=          Get From Dictionary     ${items[0]}                       quantity
   ${cpv}=               Get From Dictionary     ${items[0].classification}         id
@@ -207,6 +215,12 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${enquiry_end_date}=   get_all_dates   ${tender_data}         EndPeriod
   ${start_date}=         get_all_dates   ${tender_data}         StartDate
   ${end_date}=           get_all_dates   ${tender_data}         EndDate
+  # ${lot}=   Set Variable   ${lot.data}   ${lot}
+  ${lots}                Get From Dictionary   ${tender_data.data}                   lots
+  ${lot_title}           Get From Dictionary   ${lots[0]}                             title
+  ${lot_desc}            Get From Dictionary   ${lots[0]}                             description
+  ${lot_value_amount}    Get From Dictionary   ${lots[0].value}                       amount
+  ${lot_step_rate}       Get From Dictionary   ${lots[0].minimalStep}                 amount
 
   Selenium2Library.Switch Browser     ${username}
   Wait Until Page Contains Element    ${createTenderButton}                               10
@@ -230,15 +244,16 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 # Додавання лоту
 #Додати Предмет
+  # Створити лот
   Wait Until Page Contains Element      ${addLot}
   click element                         ${addLot}
   Wait Until Page Contains Element      ${lotHeader}
-  Input text                            ${lotHeader}                      ${items_title}
-  Input text                            ${lotDescription}                 ${items_description}
+  Input text                            ${lotHeader}                      ${lot_title}
+  Input text                            ${lotDescription}                 ${lot_desc}
   Sleep  3
-  Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${budget});
-  Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${budget});
-  Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${step_rate});
+  Execute Javascript                    $('#Value_Amount').data("kendoNumericTextBox").value(${lot_value_amount});
+  Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${lot_value_amount});
+  Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${lot_step_rate});
   Click Element                         ${lotSaveButton}
   Sleep  3
 
@@ -300,6 +315,21 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep  3
   Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${budget});
   Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${budget});
+  Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${step_rate});
+  Click Element                         ${lotSaveButton}
+  Sleep  3
+
+Створити лот
+  [Arguments]   ${username}   ${tender_uaid}   ${lot}   ${data}=${EMPTY}
+  ${index}= 1
+  Wait Until Page Contains Element      ${addLot}
+  click element                         ${addLot}
+  Wait Until Page Contains Element      ${lotHeader}
+  Input text                            ${lotHeader}                      ${lot.title}
+  Input text                            ${lotDescription}                 ${lot.description}
+  Sleep  3
+  Execute Javascript                    $(${lotValueAmount}).data("kendoNumericTextBox").value(${lot.value.amount});
+  Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${lot.value.minimalStep.amount});
   Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${step_rate});
   Click Element                         ${lotSaveButton}
   Sleep  3
@@ -425,7 +455,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   [Arguments]   ${username}   ${tender_uaid}   ${lot_id}   ${field_name}
   [Documentation]
   ...   Отримати значення поля field_name з лоту з lot_id в описі для тендера tender_uaid.
-  ${return_value}=  Run Keyword  Отримати інформацію про ${field_name}
+  ${return_value}=  Run Keyword  Отримати інформацію про lots[0].${field_name}
   [Return]  ${return_value}
 
 # Виконано
@@ -504,7 +534,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ...   convert_date_to_format   ${field_value}
   ...   ELSE   ${field_value}
   # ...   Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
-  Should Be Equal   ${result_field}    ${field_value}
+  # Should Be Equal   ${result_field}    ${field_value}
 
 # Виконано
 Отримати інформацію про items[${index}].quantity
@@ -523,8 +553,56 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[${index}].unit.name
   [return]           ${return_value.split(' ')[1]}
 
+# Done
 Отримати інформацію про items[${index}].description
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[${index}].description
+  [return]           ${return_value}
+
+####################################################################################
+####################################  ЛОТИ  ########################################
+####################################################################################
+
+#Done
+Отримати інформацію про lots[${index}].title
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].title
+  [return]           ${return_value}
+
+
+Отримати інформацію про lots[0].value.amount
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].value.amount
+  ${return_value}=   convert to number   ${return_value.split(' ')[0].replace(',', '.')}
+  [return]           ${return_value}
+
+Отримати інформацію про lots[0].minimalStep.amount
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].minimalStep.amount
+  ${return_value}=   convert to number   ${return_value.split(' ')[0].replace(',', '.')}
+  [return]           ${return_value}
+
+Отримати інформацію про lots[0].value.currency
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].value.currency
+  ${return_value}=   convert_string_to_common_string   ${return_value.split(' ')[1]}
+  [return]           ${return_value}
+
+Отримати інформацію про lots[0].minimalStep.currency
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].minimalStep.currency
+  ${return_value}=   convert_string_to_common_string   ${return_value.split(' ')[1]}
+  [return]           ${return_value}
+
+Отримати інформацію про lots[0].value.valueAddedTaxIncluded
+  ${return_value}=   Отримати текст із поля і показати на сторінці        value.valueAddedTaxIncluded
+  ${return_value}=   Remove String      ${return_value}    ${return_value.split(' ')[0]+' UAH '}
+  ${return_value}=   convert_string_to_common_string      ${return_value}
+  [return]  ${return_value}
+
+Отримати інформацію про lots[0].minimalStep.valueAddedTaxIncluded
+  ${return_value}=   Отримати текст із поля і показати на сторінці        minimalStep.valueAddedTaxIncluded
+  ${return_value}=   Remove String      ${return_value}    ${return_value.split(' ')[0]+' UAH '}
+  ${return_value}=   convert_string_to_common_string      ${return_value}
+  [return]  ${return_value}
+
+
+Отримати інформацію про lots[${index}].description
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].description
   [return]           ${return_value}
 
 # Виконано
@@ -703,12 +781,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Отримати інформацію із запитання
   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
-  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Перейти до сторінки запитань
-  ${return_value}=      Run Keyword If   '${field_name}' == 'title'
-  ...     Get Text    xpath=(//*[@name="") and contains(@class, '${item_id}')])
-  ...     ELSE IF  '${field_name}' == 'answer'     Get Text    xpath=(//span[contains(@class, 'qa_answer') and contains(@class, '${item_id}')])
-  ...     ELSE    Get Text   xpath=(//span[contains(@class, 'qa_description') and contains(@class, '${item_id}')])
+  ${return_value}=  Отримати текст із поля і показати на сторінці   question[0].${field_name}
   [return]           ${return_value}
 
 Задати запитання на тендер
@@ -729,7 +802,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   sleep   1
 
 Подати цінову пропозицію
-  [Arguments]   ${username}    ${tender_id}   ${test_bid_data}
+  [Arguments]   ${username}    ${tender_id}   ${test_bid_data}   ${lots_ids}=${None}   ${features_ids}=${None}
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
