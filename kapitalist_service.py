@@ -42,12 +42,10 @@ def string_to_float(string):
 
 def convert_string_to_common_string(string):
     return {
-        u"Київська область": u"місто Київ",
+        u"Київська область": u"Київ",
         u"Украина": u"Україна",
         u"м. Київ": u"Київ",
-        u"кг.": u"кілограм",
         u"грн.": u"UAH",
-        u" Картонні коробки": u"Картонні коробки",
         u"З ПДВ": True,
     }.get(string, string)
 
@@ -64,12 +62,12 @@ def get_tender_id(str_tender_id):
 
 def adapt_tender_data(tender_data):
     tender_data['data']['procuringEntity']['name'] = u"qa_test"
-    tenderPeriod_startDate = parser.parse(tender_data['tenderPeriod']['startDate'])
-    # tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
-    tender_data["tenderPeriod"]["startDate"] = tenderPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
-    enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
-    # enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
-    tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+    # tenderPeriod_startDate = parser.parse(tender_data['tenderPeriod']['startDate'])
+    # # tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
+    # tender_data["tenderPeriod"]["startDate"] = tenderPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+    # enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
+    # # enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
+    # tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     return tender_data
 
 
@@ -77,7 +75,8 @@ def remove_first_word(str):
     return str.lstrip(str.split(' ')[0]+' ')
 
 def get_time_with_offset(date):
-    date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M")
+    # date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M")
+    date_obj = datetime.strptime(date, "%d.%m.%Y %H:%M")
     time_zone = timezone('Europe/Kiev')
     localized_date = time_zone.localize(date_obj)
     return localized_date.strftime('%Y-%m-%d %H:%M:%S.%f%z')

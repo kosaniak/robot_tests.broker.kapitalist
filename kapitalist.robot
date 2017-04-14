@@ -46,7 +46,7 @@ ${locator.items[0].classification.description}                  css=[name="item.
 ${locator.items[0].unit.name}                                   css=[name="item.Quantity"]
 ${locator.items[0].unit.code}                                   css=[name="item.Unit.Code"]
 ${locator.items[0].quantity}                                    css=[name="item.Quantity"]
-${locator.questions[0].title}                                   name=question.Title
+${locator.questions[0].title}                                   xpath=//*[@name="question.Title"]
 ${locator.questions[0].description}                             css=[name="question.Description"]
 ${locator.questions[0].date}                                    css=[name="question.Date"]
 ${locator.questions[0].answer}                                  css=[name="question.Answer"]
@@ -131,12 +131,12 @@ ${answer.save.button}            css=[type="submit"]
 #Подання пропозиції
 ${bid_take_part_button}              xpath=//*[@id="general"]//a[contains(text(), "Взяти участь")]
 ${bid_select_lot_checkbox}           xpath=//*[@class="cr"]
-${bid_lot_value}                     id=Lots_c6a6d754-6ccc-48f4-b4f6-37a59c90f440__Value
+${bid_lot_value}                     css=input[id*="Value_Amount"]
 ${bid_add_document}                  id=files
 ${bid_approve_button}                xpath=//*[@type="submit"]
 ${bids.tab}                          xpath=//a[@href="#bids"]
 ${cancelation.bid}                   css=[title="Відмінити пропозицію"]
-${edit.bid.button}                   xpath=//a[contains(@onclick, '_edit')]
+${edit.bid.button}                   xpath=//fieldset/fieldset[1]/div/div[2]/a
 
 
 
@@ -153,7 +153,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 #Виконано
 Підготувати дані для оголошення тендера
   [Arguments]    ${username}    ${tender_data}     ${role_name}
-  # ${tender_data}=    adapt_tender_data    ${tender_data}
+  ${tender_data}=    adapt_tender_data    ${tender_data}
   [Return]    ${tender_data}
 
 #Виконано
@@ -205,7 +205,6 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${items_description}=   Get From Dictionary   ${items[0]}                       description
   ${quantity}=          Get From Dictionary     ${items[0]}                       quantity
   ${cpv}=               Get From Dictionary     ${items[0].classification}         id
-  # ${dkpp_id}=           Get From Dictionary     ${items[0].additionalClassifications}      id
   ${unit}=              Get From Dictionary     ${items[0].unit}                   name
   ${latitude}=          Get From Dictionary     ${items[0].deliveryLocation}      latitude
   ${longitude}=         Get From Dictionary     ${items[0].deliveryLocation}      longitude
@@ -217,7 +216,6 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${enquiry_end_date}=   get_all_dates   ${tender_data}         EndPeriod
   ${start_date}=         get_all_dates   ${tender_data}         StartDate
   ${end_date}=           get_all_dates   ${tender_data}         EndDate
-  # ${lot}=   Set Variable   ${lot.data}   ${lot}
   ${lots}                Get From Dictionary   ${tender_data.data}                   lots
   ${lot_title}           Get From Dictionary   ${lots[0]}                             title
   ${lot_desc}            Get From Dictionary   ${lots[0]}                             description
@@ -275,7 +273,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element             id=${cpv}_anchor
   Sleep  1
   Run Keyword If   '${cpv}' == '99999999-9'
-  ...   Input Text   ${item.additional.classification}      ${items[0].additionalClassifications}
+  ...   Input Text   ${item.additional.classification}      ${items[0].additionalClassifications.description}
   Execute Javascript                    $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
   Input Text                            ${unitName}                       ${unit}
   Press Key                             ${unitName}                       \\\13
@@ -453,7 +451,6 @@ ${cancelation.submit.button}     css=[type="submit"]
   [return]           ${return_value}
 
 Отримати інформацію із лоту
-
   [Arguments]   ${username}   ${tender_uaid}   ${lot_id}   ${field_name}
   [Documentation]
   ...   Отримати значення поля field_name з лоту з lot_id в описі для тендера tender_uaid.
@@ -534,7 +531,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${result_field}=   run keyword  kapitalist.Отримати інформацію про ${field_name}
   ${result_field}=   Run Keyword If   '${field_name}' == 'tenderPeriod.endDate'
   ...   convert_date_to_format   ${field_value}
-  ...   ELSE   ${field_value}
+  # ...   ELSE   ${field_value}
   # ...   Should Be Equal   ${result_field}   convert_date_to_format   ${field_value}
   # Should Be Equal   ${result_field}    ${field_value}
 
@@ -597,7 +594,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   [return]  ${return_value}
 
 Отримати інформацію про lots[0].minimalStep.valueAddedTaxIncluded
-  ${return_value}=   Отримати текст із поля і показати на сторінці        minimalStep.valueAddedTaxIncluded
+  ${return_value}=   Отримати текст із поля і показати на сторінці        lots[0].minimalStep.valueAddedTaxIncluded
   ${return_value}=   Remove String      ${return_value}    ${return_value.split(' ')[0]+' UAH '}
   ${return_value}=   convert_string_to_common_string      ${return_value}
   [return]  ${return_value}
@@ -664,19 +661,21 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про tenderPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.startDate
-  ${return_value}=   convert_datetime_to_iso    ${return_value}
+  # ${return_value}=   convert_datetime_to_iso    ${return_value}
   ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про tenderPeriod.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.endDate
+  ${return_value}=   get_time_with_offset    ${return_value}
+  # ${return_value}=   convert_datetime_to_iso    ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про enquiryPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   enquiryPeriod.startDate
-  ${return_value}=   convert_datetime_to_iso    ${return_value}
+  # ${return_value}=   convert_datetime_to_iso    ${return_value}
   ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
@@ -689,7 +688,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.countryName
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.countryName
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -700,13 +699,13 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.region
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.region
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
+  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -728,6 +727,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 # Виконано
 Отримати інформацію про questions[0].title
+  Wait Until Page Contains    ${locator.question.Title}
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].title
   [return]           ${return_value}
 
@@ -792,16 +792,15 @@ ${cancelation.submit.button}     css=[type="submit"]
   Задати питання   ${username}    ${tender_uaid}     ${question}
 
 
-# Виконано
-# Відповісти на запитання
-#   [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
-#   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-#   Перейти до сторінки запитань
-#   Wait Until Page Contains Element      ${answer.button}
-#   Click Element                         ${answer.button}
-#   Input Text                            id=e_answer                             ${answer_data.data.answer}
-#   Click Element                         id=SendAnswer
-#   sleep   1
+#Виконано
+Відповісти на запитання
+  [Arguments]    ${username}   ${tender_uaid}    ${answer_data}   ${item_id}
+  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+  Wait Until Page Contains Element      ${answer.button}
+  Click Element                         ${answer.button}
+  Input Text                            ${answer.text.field}                     ${answer_data.data.answer}
+  Click Element                         ${answer.save.button}
+  sleep   1
 
 Подати цінову пропозицію
   [Arguments]   ${username}    ${tender_id}   ${test_bid_data}   ${lots_ids}=${None}   ${features_ids}=${None}
@@ -813,20 +812,14 @@ ${cancelation.submit.button}     css=[type="submit"]
   # kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
   Wait Until Page Contains Element          ${bid_take_part_button}
   Click Element                             ${bid_take_part_button}
-  Sleep   3
-  Select Window   id=form0
+  Sleep   5
   Wait Until Page Contains Element          ${bid_select_lot_checkbox}
   Click Element                             ${bid_select_lot_checkbox}
-  Execute Javascript                        $(${bid_lot_value}).data("kendoNumericTextBox").value(${amount});
-  # Run Keyword If    ${is_qualified}   Click Element   id=lcbBid_selfQualified
-  # Run Keyword If    ${is_eligible}    Click Element   id=lcbBid_selfEligible
+  Sleep   5
+  Execute Javascript                        $('input[id*="Value_Amount"]').data("kendoNumericTextBox").value(${amount});
   Click Element                             ${bid_approve_button}
   sleep   3
-  # Wait Until Page Contains Element          ${bids.tab}     10
-  # Click Element                             ${bids.tab}
-  # sleep   1
-  # ${resp}=    Get Value      id=eBid_price
-  # [return]    ${resp}
+
 
 Скасувати цінову пропозицію
   [Arguments]  @{ARGUMENTS}
@@ -840,50 +833,46 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep   3
   Wait Until Page Contains Element   ${cancelation.bid}
   Click Element       ${cancelation.bid}
-  Select Window   id=form0
+  Wait Until Page Contains Element   ${cancelation.bid}
   Click Element   css=[type="submit"]
 
-
+#Done
 Отримати інформацію із пропозиції
   [Arguments]  ${username}  ${tender_uaid}   ${field}
   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
   Sleep   3
-  ${value}=   Get Value     id=eBid_price
-  ${value}=   Convert To Number      ${value}
+  ${value}=   Get Text     css=[name="lotValue.Value"]
+  ${value}=   Convert To Number      ${value.split(' ')[0].replace(',', '.')}
   [Return]    ${value}
 
 Змінити цінову пропозицію
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...    ${ARGUMENTS[0]} ==  username
-  ...    ${ARGUMENTS[1]} ==  tenderId
-  ...    ${ARGUMENTS[2]} ==  amount
-  ...    ${ARGUMENTS[3]} ==  amount.value
-  ${amount}=    get_str          ${${ARGUMENTS[3]}}
-  kapitalist.Пошук тендера по ідентифікатору  ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
-  Wait Until Page Contains Element          xpath=(//*[@id='btnShowBid' and not(contains(@style,'display: none'))])
-  Click Element       id=btnShowBid
-  Sleep   3
-  Wait Until Page Contains Element          xpath=(//*[@id='eBid_price' and not(contains(@style,'display: none'))])
-  Input Text              id=eBid_price     ${amount}
-  sleep   1
-  Click Element       id=btn_public
+  [Arguments]  ${username}  ${tender_uaid}  ${fieldname}  ${fieldvalue}
+  kapitalist.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  Wait Until Page Contains Element            ${bids.tab}
+  Click Element                               ${bids.tab}
+  Wait Until Page Contains Element            ${edit.bid.button}
+  Click Element   ${edit.bid.button}
+  Execute Javascript                        $('#Value_Amount').data("kendoNumericTextBox").value(${fieldvalue});
+  # ${status}=  Run Keyword And Return Status  Page Should Not Contain  Замовником внесено зміни в умови оголощення.
+  # Run Keyword If  ${status}  ConvToStr And Input Text  xpath=//input[contains(@name,'[value][amount]')]  ${fieldvalue}
+  # ...  ELSE  Click Element  name=bid_confirm
+  Click Element  xpath=//[@type="submit"]
+  # Wait Until Element Is Visible xpath=//div[contains(@class, 'alert-success')]
 
 Завантажити документ в ставку
-  [Arguments]  @{ARGUMENTS}
+  [Arguments]   ${file}   ${tender_id}
   [Documentation]
   ...    ${ARGUMENTS[1]} ==  file
   ...    ${ARGUMENTS[2]} ==  tenderId
-  Wait Until Page Contains Element          xpath=(//*[@id='btnShowBid' and not(contains(@style,'display: none'))])
-  Click Element     id=btnShowBid
+  Wait Until Page Contains Element          xpath=//a[contains(@onclick, '/documents/_add')]
+  Click Element     xpath=//a[contains(@onclick, '/documents/_add')]
   Sleep   3
-  Wait Until Page Contains Element          xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element     id=btn_documents_add
-  Choose File       xpath=(//*[@id='upload_form']/input[2])   ${ARGUMENTS[1]}
+  Wait Until Page Contains Element          id=Document
+  Choose File       id=Document   ${file}
   Sleep   2
-  Click Element     id=upload_button
+  Click Element     css=[type="submit"]
   Reload Page
 
 Змінити документ в ставці
@@ -897,7 +886,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element     css=.bt_ReUpload:first-child
   Choose File       xpath=(//*[@id='upload_form']/input[2])   ${ARGUMENTS[1]}
   Sleep   2
-  Click Element     id=upload_button
+  Click Element     css=[type="submit"]
   Reload Page
 
 Завантажити фінансову ліцензію
