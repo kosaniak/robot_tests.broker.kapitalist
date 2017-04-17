@@ -136,7 +136,7 @@ ${bid_add_document}                  id=files
 ${bid_approve_button}                xpath=//*[@type="submit"]
 ${bids.tab}                          xpath=//a[@href="#bids"]
 ${cancelation.bid}                   css=[title="Відмінити пропозицію"]
-${edit.bid.button}                   xpath=//fieldset/fieldset[1]/div/div[2]/a
+${edit.bid.button}                   xpath=//a[contains(@onclick, '/_edit')]
 
 
 
@@ -165,6 +165,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Set Window Size   @{USERS.users['${username}'].size}
   Set Window Position   @{USERS.users['${username}'].position}
   Run Keyword If   '${username}' != 'kapitalist_Viewer'   Вхід   ${username}
+  Execute Javascript   $('#languageList a[onclick*="uk"]').click();
 
 #Виконано
 Вхід
@@ -203,6 +204,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${step_rate}=         Get From Dictionary     ${tender_data.data.minimalStep}   amount
   ${items_title}=       Get From Dictionary     ${items[0]}                       description
   ${items_description}=   Get From Dictionary   ${items[0]}                       description
+#  ${additionalClassifications_description}=   Get From Dictionary   ${tender_data.data.items[0].classifications.additionalClassifications[0]}   description
   ${quantity}=          Get From Dictionary     ${items[0]}                       quantity
   ${cpv}=               Get From Dictionary     ${items[0].classification}         id
   ${unit}=              Get From Dictionary     ${items[0].unit}                   name
@@ -210,9 +212,12 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${longitude}=         Get From Dictionary     ${items[0].deliveryLocation}      longitude
   ${postalCode}=        Get From Dictionary     ${items[0].deliveryAddress}       postalCode
   ${streetAddress}=     Get From Dictionary     ${items[0].deliveryAddress}       streetAddress
+  ${region}=            Get From Dictionary     ${items[0].deliveryAddress}       region
+  ${countryName}        Get From Dictionary     ${items[0].deliveryAddress}       countryName
+  ${locality}=            Get From Dictionary     ${items[0].deliveryAddress}     locality
   ${deliveryDate}=      Get From Dictionary     ${items[0].deliveryDate}          endDate
   ${deliveryDate}=      convert_date_to_format        ${deliveryDate}
-  ${tenderPeriod}=   Get From Dictionary   ${tender_data.data}               tenderPeriod
+  ${tenderPeriod}=      Get From Dictionary   ${tender_data.data}               tenderPeriod
   ${enquiry_end_date}=   get_all_dates   ${tender_data}         EndPeriod
   ${start_date}=         get_all_dates   ${tender_data}         StartDate
   ${end_date}=           get_all_dates   ${tender_data}         EndDate
@@ -273,16 +278,16 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element             id=${cpv}_anchor
   Sleep  1
   Run Keyword If   '${cpv}' == '99999999-9'
-  ...   Input Text   ${item.additional.classification}      ${items[0].additionalClassifications.description}
+  ...   Input Text   ${item.additional.classification}      ${additionalClassifications_description}
   Execute Javascript                    $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
   Input Text                            ${unitName}                       ${unit}
   Press Key                             ${unitName}                       \\\13
   Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
-  # Input Text                            ${deliveryAddressCountry}         Україна
-  Input Text                            ${DeliveryAddress.Region}         Київська область
-  Input Text                            ${DeliveryAddress.City}           м. Київ
+  Execute Javascript                    $(${deliveryAddressCountry}).data("kendoComboBox").value("${countryName}");
+  Input Text                            ${DeliveryAddress.Region}         ${region}
+  Input Text                            ${DeliveryAddress.City}           ${locality}
   Input Text                            ${DeliveryAddress_PostalCode}     ${postalCode}
   Input Text                            ${DeliveryAddress_Street}         ${streetAddress}
   Click Element                         ${itemSaveButton}
@@ -619,7 +624,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію про items[${index}].classification.description
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[${index}].classification.description
   ${return_value}=   remove_first_word     ${return_value}
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -661,7 +665,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про tenderPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.startDate
-  # ${return_value}=   convert_datetime_to_iso    ${return_value}
   ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
@@ -669,26 +672,23 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію про tenderPeriod.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   tenderPeriod.endDate
   ${return_value}=   get_time_with_offset    ${return_value}
-  # ${return_value}=   convert_datetime_to_iso    ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про enquiryPeriod.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   enquiryPeriod.startDate
-  # ${return_value}=   convert_datetime_to_iso    ${return_value}
   ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про enquiryPeriod.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   enquiryPeriod.endDate
-  # ${return_value}=   convert_date_to_format    ${date_value}
+  ${return_value}=   get_time_with_offset    ${date_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.countryName
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.countryName
-  ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -699,13 +699,13 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.region
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.region
-  ${return_value}=   convert_string_to_common_string   ${return_value}
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
-  ${return_value}=   convert_string_to_common_string   ${return_value}
+  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -727,7 +727,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 # Виконано
 Отримати інформацію про questions[0].title
-  Wait Until Page Contains    ${locator.question.Title}
+  Wait Until Page Contains Element    ${locator.questions[0].title}
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].title
   [return]           ${return_value}
 
@@ -850,41 +850,49 @@ ${cancelation.submit.button}     css=[type="submit"]
 Змінити цінову пропозицію
   [Arguments]  ${username}  ${tender_uaid}  ${fieldname}  ${fieldvalue}
   kapitalist.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  Sleep   5
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
+  Sleep  5
   Wait Until Page Contains Element            ${edit.bid.button}
-  Click Element   ${edit.bid.button}
-  Execute Javascript                        $('#Value_Amount').data("kendoNumericTextBox").value(${fieldvalue});
-  # ${status}=  Run Keyword And Return Status  Page Should Not Contain  Замовником внесено зміни в умови оголощення.
-  # Run Keyword If  ${status}  ConvToStr And Input Text  xpath=//input[contains(@name,'[value][amount]')]  ${fieldvalue}
-  # ...  ELSE  Click Element  name=bid_confirm
-  Click Element  xpath=//[@type="submit"]
-  # Wait Until Element Is Visible xpath=//div[contains(@class, 'alert-success')]
+  Click Element                               ${edit.bid.button}
+  Sleep   5
+  Execute Javascript                          $('#Value_Amount').data("kendoNumericTextBox").value(${fieldvalue});
+  Click Element  xpath=//*[@type="submit"]
 
 Завантажити документ в ставку
-  [Arguments]   ${file}   ${tender_id}
+  [Arguments]   ${username}   ${path}   ${tender_uaid}   ${doc_type}=documents
   [Documentation]
   ...    ${ARGUMENTS[1]} ==  file
   ...    ${ARGUMENTS[2]} ==  tenderId
+  kapitalist.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  Wait Until Page Contains Element            ${bids.tab}
+  Click Element                               ${bids.tab}
+  Sleep  5
   Wait Until Page Contains Element          xpath=//a[contains(@onclick, '/documents/_add')]
   Click Element     xpath=//a[contains(@onclick, '/documents/_add')]
   Sleep   3
   Wait Until Page Contains Element          id=Document
-  Choose File       id=Document   ${file}
+  Choose File       id=Document   ${path}
   Sleep   2
   Click Element     css=[type="submit"]
   Reload Page
 
 Змінити документ в ставці
-  [Arguments]  @{ARGUMENTS}
+  [Arguments]   ${username}   ${tender_uaid}   ${path}   ${bidId}
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  file
   ...    ${ARGUMENTS[2]} ==  bidId
   Reload Page
-  Wait Until Page Contains Element           xpath=(//*[@id='btn_documents_add' and not(contains(@style,'display: none'))])
-  Click Element     css=.bt_ReUpload:first-child
-  Choose File       xpath=(//*[@id='upload_form']/input[2])   ${ARGUMENTS[1]}
+  Wait Until Page Contains Element            ${bids.tab}
+  Click Element                               ${bids.tab}
+  Sleep  5
+  Wait Until Page Contains Element          xpath=//a[contains(@onclick, '/documents/_add')]
+  Click Element     xpath=//a[contains(@onclick, '/documents/_add')]
+  Sleep   3
+  Wait Until Page Contains Element          id=Document
+  Choose File       id=Document   ${path}
   Sleep   2
   Click Element     css=[type="submit"]
   Reload Page
@@ -911,17 +919,17 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати посилання на аукціон для глядача
   [Arguments]  @{ARGUMENTS}
   Switch Browser       ${ARGUMENTS[0]}
-  Wait Until Page Contains Element   xpath=(//*[@id='aPosition_auctionUrl' and not(contains(@style,'display: none'))])
+  Wait Until Page Contains Element   xpath=//*[@title="Перейти до аукціону"]
   Sleep   5
-  ${result} =   Get Text  id=aPosition_auctionUrl
+  ${result} =   get element attribute  xpath=//*[@title="Перейти до аукціону"]@href
   [return]   ${result}
 
 Отримати посилання на аукціон для учасника
   [Arguments]  @{ARGUMENTS}
   Switch Browser       ${ARGUMENTS[0]}
-  Wait Until Page Contains Element   xpath=(//*[@id='aPosition_auctionUrl' and not(contains(@style,'display: none'))])
+  Wait Until Page Contains Element   xpath=//*[@title="Перейти до аукціону"]
   Sleep   5
-  ${result}=    Get Text  id=aPosition_auctionUrl
+  ${result}=    Get Text  xpath=//*[@title="Перейти до аукціону"]@href
   [return]   ${result}
 
 
