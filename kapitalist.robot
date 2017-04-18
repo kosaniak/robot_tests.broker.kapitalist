@@ -497,7 +497,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Reload Page
   Wait Until Page Contains Element      xpath=//*[@name="Status"]
   Sleep   2
-  ${return_value}=   Get Text   xpath=//*[@name="Status"]
+  ${return_value}=   Get Element Attribute   xpath=//*[@name="Status"]@data-key
+  # ${return_value}=   convert_status   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -683,7 +684,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про enquiryPeriod.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   enquiryPeriod.endDate
-  ${return_value}=   get_time_with_offset    ${date_value}
+  ${return_value}=   get_time_with_offset    ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -857,6 +858,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Wait Until Page Contains Element            ${edit.bid.button}
   Click Element                               ${edit.bid.button}
   Sleep   5
+  # ${fieldvalue}=    Convert To Number    ${field_value}
   Execute Javascript                          $('#Value_Amount').data("kendoNumericTextBox").value(${fieldvalue});
   Click Element  xpath=//*[@type="submit"]
 
@@ -888,10 +890,11 @@ ${cancelation.submit.button}     css=[type="submit"]
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
   Sleep  5
-  Wait Until Page Contains Element          xpath=//a[contains(@onclick, '/documents/_add')]
-  Click Element     xpath=//a[contains(@onclick, '/documents/_add')]
+  Wait Until Page Contains Element          xpath=//a[contains(@href, 'documents/')]
+  Click Element     xpath=//a[contains(@href, 'documents/')]
   Sleep   3
-  Wait Until Page Contains Element          id=Document
+  # Wait Until Page Contains Element          id=Document
+  # Sleep   2
   Choose File       id=Document   ${path}
   Sleep   2
   Click Element     css=[type="submit"]
