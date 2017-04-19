@@ -36,7 +36,8 @@ def convert_datetime_to_iso(date):
 
 
 def string_to_float(string):
-    return format(string, '.1f')
+    string = float(string)
+    return round(string, 2)
 
 
 
@@ -62,12 +63,6 @@ def get_tender_id(str_tender_id):
 
 def adapt_tender_data(tender_data):
     tender_data['data']['procuringEntity']['name'] = u"qa_test"
-    # tenderPeriod_startDate = parser.parse(tender_data['tenderPeriod']['startDate'])
-    # # tenderPeriod_startDate = tenderPeriod_startDate + timedelta(minutes=6)
-    # tender_data["tenderPeriod"]["startDate"] = tenderPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
-    # enquiryPeriod_startDate = parser.parse(tender_data['enquiryPeriod']['startDate'])
-    # # enquiryPeriod_startDate = enquiryPeriod_startDate + timedelta(minutes=6)
-    # tender_data["enquiryPeriod"]["startDate"] = enquiryPeriod_startDate.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     return tender_data
 
 
@@ -75,7 +70,6 @@ def remove_first_word(str):
     return str.lstrip(str.split(' ')[0]+' ')
 
 def get_time_with_offset(date):
-    # date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M")
     date_obj = datetime.strptime(date, "%d.%m.%Y %H:%M")
     time_zone = timezone('Europe/Kiev')
     localized_date = time_zone.localize(date_obj)

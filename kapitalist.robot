@@ -278,7 +278,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element             id=${cpv}_anchor
   Sleep  1
   Run Keyword If   '${cpv}' == '99999999-9'
-  ...   Input Text   ${item.additional.classification}      ${additionalClassifications_description}
+#  ...   Input Text   ${item.additional.classification}      ${additionalClassifications_description}
+  ...   Input Text   ${item.additional.classification}      ДКПП
   Execute Javascript                    $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
   Input Text                            ${unitName}                       ${unit}
   Press Key                             ${unitName}                       \\\13
@@ -295,8 +296,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   #Публікація тендеру
   Click Element                         ${publicTenderButton}
   Sleep  5
-  wait until page contains element      xpath=//*[@id="tabstrip"]/../h3
-  ${tender_UAid}=  Get Text  xpath=//*[@id="tabstrip"]/../h3
+  wait until page contains element      xpath=//*[@id="custom-modal"]/../div/div/h3
+  ${tender_UAid}=  Get Text  xpath=//*[@id="custom-modal"]/../div/div/h3
   Sleep  1
   ${tender_UAid}=  get_tender_id      ${tender_UAid}
   Log   ${tender_UAid}
@@ -497,8 +498,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Reload Page
   Wait Until Page Contains Element      xpath=//*[@name="Status"]
   Sleep   2
-  ${return_value}=   Get Element Attribute   xpath=//*[@name="Status"]@data-key
-  # ${return_value}=   convert_status   ${return_value}
+  ${return_value}=   Get Text   xpath=//*[@name="Status"]
   [return]           ${return_value}
 
 # Виконано
@@ -575,12 +575,12 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Отримати інформацію про lots[0].value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].value.amount
-  ${return_value}=   convert to number   ${return_value.split(' ')[0].replace(',', '.')}
+  ${return_value}=   string_to_float   ${return_value.split(' ')[0].replace(',', '.')}
   [return]           ${return_value}
 
 Отримати інформацію про lots[0].minimalStep.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].minimalStep.amount
-  ${return_value}=   convert to number   ${return_value.split(' ')[0].replace(',', '.')}
+  ${return_value}=   string_to_float   ${return_value.split(' ')[0].replace(',', '.')}
   [return]           ${return_value}
 
 Отримати інформацію про lots[0].value.currency
@@ -700,13 +700,11 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.region
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.region
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про items[0].deliveryAddress.locality
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].deliveryAddress.locality
-  # ${return_value}=   convert_string_to_common_string   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -717,17 +715,16 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Внесені правки
 Отримати інформацію про items[0].deliveryDate.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
-  # ${return_value}=   convert_date_to_format    ${return_value}
   [return]           ${return_value}
 
   # Внесені правки
 Отримати інформацію про items[0].deliveryDate.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
-  # ${return_value}=   convert_date_to_format    ${return_value}
   [return]           ${return_value}
 
 # Виконано
 Отримати інформацію про questions[0].title
+  Execute Javascript                    location.href = "[name="question.Title"]";
   Wait Until Page Contains Element    ${locator.questions[0].title}
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].title
   [return]           ${return_value}
@@ -857,8 +854,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep  5
   Wait Until Page Contains Element            ${edit.bid.button}
   Click Element                               ${edit.bid.button}
+  ${fieldvalue}=   Convert to Number         ${fieldvalue}
   Sleep   5
-  # ${fieldvalue}=    Convert To Number    ${field_value}
   Execute Javascript                          $('#Value_Amount').data("kendoNumericTextBox").value(${fieldvalue});
   Click Element  xpath=//*[@type="submit"]
 
@@ -890,11 +887,10 @@ ${cancelation.submit.button}     css=[type="submit"]
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
   Sleep  5
-  Wait Until Page Contains Element          xpath=//a[contains(@href, 'documents/')]
-  Click Element     xpath=//a[contains(@href, 'documents/')]
+  Wait Until Page Contains Element          xpath=//a[contains(@onclick, '/documents/_add')]
+  Click Element     xpath=//a[contains(@onclick, '/documents/_add')]
   Sleep   3
-  # Wait Until Page Contains Element          id=Document
-  # Sleep   2
+  Wait Until Page Contains Element          id=Document
   Choose File       id=Document   ${path}
   Sleep   2
   Click Element     css=[type="submit"]
