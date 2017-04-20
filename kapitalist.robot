@@ -8,7 +8,7 @@ Library  DebugLibrary
 
 *** Variables ***
 # Для тесткейсів
-${locator.tenderId}                                             css=[class="body-wrapper"]>div>h3
+${locator.tenderId}                                             xpath=//a[contains(@href, 'gov.ua/tender/')]
 ${locator.title}                                                css=[name="Title"]
 ${locator.description}                                          xpath=//*[@name="Description"]
 ${locator.value.amount}                                         css=[name="Value.Amount"]
@@ -296,8 +296,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   #Публікація тендеру
   Click Element                         ${publicTenderButton}
   Sleep  5
-  wait until page contains element      xpath=//*[@id="custom-modal"]/../div/div/h3
-  ${tender_UAid}=  Get Text  xpath=//*[@id="custom-modal"]/../div/div/h3
+  wait until page contains element      xpath=//a[contains(@href, 'gov.ua/tender/')]
+  ${tender_UAid}=  Get Text  xpath=//a[contains(@href, 'gov.ua/tender/')]
   Sleep  1
   ${tender_UAid}=  get_tender_id      ${tender_UAid}
   Log   ${tender_UAid}
@@ -403,6 +403,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Input text          ${QuestionDescription}           ${description}
   Click Element       ${saveQuestionButton}
   Sleep  3
+  Reload Page
 
 # виконане
 Скасувати закупівлю
@@ -510,6 +511,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
   ${return_value}=   Convert to Number   ${return_value.split(' ')[0].replace(',', '.')}
+#  ${return_value}=      ${return_value.split(' ')[0].replace(',', '.')}
   # ${return_value}=   string_to_float   ${return_value}
   [return]           ${return_value}
 
@@ -575,12 +577,12 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Отримати інформацію про lots[0].value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].value.amount
-  ${return_value}=   string_to_float   ${return_value.split(' ')[0].replace(',', '.')}
+  ${return_value}=   Convert To Number   ${return_value.split(' ')[0].replace(',', '.')}
   [return]           ${return_value}
 
 Отримати інформацію про lots[0].minimalStep.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   lots[0].minimalStep.amount
-  ${return_value}=   string_to_float   ${return_value.split(' ')[0].replace(',', '.')}
+  ${return_value}=   Convert To Number   ${return_value.split(' ')[0].replace(',', '.')}
   [return]           ${return_value}
 
 Отримати інформацію про lots[0].value.currency
@@ -724,7 +726,8 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 # Виконано
 Отримати інформацію про questions[0].title
-  # Execute Javascript                    location.href = "${locator.questions[0].title}"]";
+  Execute Javascript                    location.href = "[name='question.Title']";
+  Sleep  5
   Wait Until Page Contains Element    ${locator.questions[0].title}
   ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].title
   [return]           ${return_value}
@@ -764,7 +767,8 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Отримати інформацію із запитання
   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
-  ${return_value}=  Отримати текст із поля і показати на сторінці   question[0].${field_name}
+  Reload Page
+  ${return_value}=  Get Text   ${locator.questions[0].title}
   [return]           ${return_value}
 
 Задати запитання на тендер
@@ -803,12 +807,12 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 
 Скасувати цінову пропозицію
-  [Arguments]  @{ARGUMENTS}
+  [Arguments]    ${user_name}   ${tender_id}
   [Documentation]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  tenderId
 .. Log Many
-  kapitalist.Пошук тендера по ідентифікатору  ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
+  kapitalist.Пошук тендера по ідентифікатору  ${user_name}  ${tender_id}
   Wait Until Page Contains Element   ${bids.tab}
   Click Element       ${bids.tab}
   Sleep   3
@@ -839,8 +843,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element                               ${edit.bid.button}
   ${fieldvalue}=   Convert to Number         ${fieldvalue}
   Sleep   5
-  Execute Javascript                        $('input[id*="Value_Amount"]').data("kendoNumericTextBox").value(${fieldvalue});
-  # Execute Javascript                          $('#Value_Amount').data("kendoNumericTextBox").value(${fieldvalue});
+  Execute Javascript                        $('input[id="Value_Amount"]').data("kendoNumericTextBox").value(${fieldvalue});
+  Sleep  5
   Click Element  xpath=//*[@type="submit"]
 
 Завантажити документ в ставку
@@ -867,7 +871,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ...    ${ARGUMENTS[0]} ==  username
   ...    ${ARGUMENTS[1]} ==  file
   ...    ${ARGUMENTS[2]} ==  bidId
-  Reload Page
+  kapitalist.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
   Sleep  5
@@ -914,14 +918,3 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep   5
   ${result}=    Get Element Attribute  xpath=//a[contains(@href, 'auction-sandbox.openprocurement.org/tenders/')]@href
   [return]   ${result}
-
-
-Підтвердити підписання контракту
-  [Arguments]  ${username}  ${tender_uaid}  ${contract_num}
-  ${file_path}  ${file_title}  ${file_content}=   create_fake_doc
-  Sleep    5
-  kapitalist.Завантажити угоду до тендера   ${username}  ${tender_uaid}  1  ${filepath}
-  Wait Until Page Contains Element      xpath=(//*[@id='tPosition_status' and not(contains(@style,'display: none'))])
-  Click Element                xpath=(//*[@id='pnAwardList']/div[last()]//span[contains(@class, 'contract_register')])
-
-

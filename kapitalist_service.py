@@ -24,7 +24,6 @@ def get_all_dates(initial_tender_data, key):
 
 def convert_date_to_format(isodate):
     iso_dt = parse_date(isodate)
-    # date_string = iso_dt.strftime("%m/%d/%Y")
     date_string = iso_dt.strftime("%d.%m.%Y %H:%M")
     return date_string
 
@@ -35,17 +34,8 @@ def convert_datetime_to_iso(date):
 
 
 
-def string_to_float(string):
-    string = float(string)
-    return round(string, 2)
-
-
-
 def convert_string_to_common_string(string):
     return {
-        u"Київська область": u"Київ",
-        u"Украина": u"Україна",
-        u"м. Київ": u"Київ",
         u"грн.": u"UAH",
         u"З ПДВ": True,
     }.get(string, string)
