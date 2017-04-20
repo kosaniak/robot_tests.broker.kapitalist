@@ -768,7 +768,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію із запитання
   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
   Reload Page
-  ${return_value}=  Get Text   ${locator.questions[0].title}
+  ${return_value}=  Get Text   ${locator.questions[0].${field_name}}
   [return]           ${return_value}
 
 Задати запитання на тендер
