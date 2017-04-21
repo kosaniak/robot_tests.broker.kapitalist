@@ -53,7 +53,7 @@ ${locator.questions[0].answer}                                  css=[name="quest
 # ${locator.bids}
 ${locator.cancellations[0].status}                              css=[name="Status"]
 ${locator.cancellations[0].reason}                              css=[name="cancellation.Reason"]
-${locator.document.title}                                       xpath=//*[@name="document.Title"]/a
+${locator.document.title}                                       xpath=//*[@data-guid]/a
 
 
 # Вхід в кабінет
@@ -107,7 +107,7 @@ ${item.additional.classification}      id=AdditionalClassificationsSelectedId
 ${itemSaveButton}                xpath=//*[@type="submit"]
 
 # Завантадення документу
-${add.tender.document}           xpath=//*[@id="general"]/div/fieldset[1]/a[3]
+${add.tender.document}           xpath=//a[contains(@href, '/addLot')]/following-sibling::fieldset//a
 ${tender.document.description}   id=Description
 ${uploadButton}                  id=Document
 ${tender.document.save.button}          css=[type="submit"]
@@ -129,7 +129,7 @@ ${answer.text.field}             id=Answer
 ${answer.save.button}            css=[type="submit"]
 
 #Подання пропозиції
-${bid_take_part_button}              xpath=//*[@id="general"]//a[contains(text(), "Взяти участь")]
+${bid_take_part_button}              xpath=//a[contains(@onclick, '/bids/_add')]
 ${bid_select_lot_checkbox}           xpath=//*[@class="cr"]
 ${bid_lot_value}                     css=input[id*="Value_Amount"]
 ${bid_add_document}                  id=files
@@ -310,9 +310,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 #Виконано
 Додати предмет
   [Arguments]   ${items}   ${index}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  items
-  ...      ${ARGUMENTS[1]} ==  ${INDEX}
   Wait Until Page Contains Element      ${addLot}
   click element                         ${addLot}
   Wait Until Page Contains Element      ${lotHeader}
@@ -342,34 +339,28 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 #Виконано
 Завантажити документ
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  username
-  ...      ${ARGUMENTS[1]} ==  ${filepath}
-  ...      ${ARGUMENTS[2]} ==  ${TENDER}
-  kapitalist.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
-  Wait Until Page Contains Element             ${add.tender.document}        10
+  [Arguments]     ${user_name}   ${path}   ${tender_id}
+  kapitalist.Пошук тендера по ідентифікатору   ${user_name}   ${tender_id}
+  Sleep   2
+  Wait Until Page Contains Element             ${add.tender.document}
   Click Element                                ${add.tender.document}
   Input Text                                   ${tender.document.description}  Test_document
-  Choose File                                  ${uploadButton}   ${ARGUMENTS[1]}
+  Choose File                                  ${uploadButton}   ${path}
   Sleep             2
   Click Element                                ${tender.document.save.button}
   Reload Page
 
 #Виконано
 Пошук тендера по ідентифікатору
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  username
-  ...      ${ARGUMENTS[1]} ==  ${TENDER}
-  Switch Browser                    ${ARGUMENTS[0]}
-  Go to                             ${USERS.users['${ARGUMENTS[0]}'].homepage}
+  [Arguments]     ${user_name}   ${tender_UAID}
+  Switch Browser                    ${user_name}
+  Go to                             ${USERS.users['${user_name}'].homepage}
   Wait Until Page Contains Element  ${tenderSearchButton}                           5
   Click Element                     ${tenderSearchButton}
   Wait Until Page Contains Element  ${byTenderNumber}                               5
   Click Element                     ${byTenderNumber}
   Wait Until Page Contains Element  ${PrecurementNumber}
-  Input Text                        ${PrecurementNumber}                        ${ARGUMENTS[1]}
+  Input Text                        ${PrecurementNumber}                        ${tender_UAID}
   Click Element                     ${searchButton}
   Sleep   3
   Wait Until Page Contains Element    xpath=//*[@id="tender-table"]//a    10
@@ -391,10 +382,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 # виконане
 Задати питання
   [Arguments]   ${username}   ${tenderUaId}   ${questionId}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  username
-  ...      ${ARGUMENTS[1]} ==  tenderUaId
-  ...      ${ARGUMENTS[2]} ==  questionId
   ${title}=        Get From Dictionary  ${questionId.data}  title
   ${description}=  Get From Dictionary  ${questionId.data}  description
   kapitalist.Перейти до сторінки запитань
@@ -414,14 +401,14 @@ ${cancelation.submit.button}     css=[type="submit"]
   ...      ${ARGUMENTS[2]} = cancellation_reason
   ...      ${ARGUMENTS[3]} = doc_path
   ...      ${ARGUMENTS[4]} = description
-  kapitalist.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+  kapitalist.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}       ${ARGUMENTS[1]}
   Wait Until Page Contains Element   ${delete.tender.button}
   Click Element                      ${delete.tender.button}
   Sleep   2
-  Input text                         ${tender.cancelation.reason}                 ${ARGUMENTS[2]}
+  Input text                         ${tender.cancelation.reason}      ${ARGUMENTS[2]}
   Input text                         ${description.cancelation.file}   ${ARGUMENTS[4]}
   Sleep  3
-  Choose File                        ${cancelation.upload.file}   ${ARGUMENTS[3]}
+  Choose File                        ${cancelation.upload.file}        ${ARGUMENTS[3]}
   Sleep   2
   Click Element     ${cancelation.submit.button}
   Sleep   2
@@ -717,11 +704,13 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Внесені правки
 Отримати інформацію про items[0].deliveryDate.startDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
+  ${return_value}=     get_time_with_offset   ${return_value}
   [return]           ${return_value}
 
   # Внесені правки
 Отримати інформацію про items[0].deliveryDate.endDate
   ${return_value}=     Отримати текст із поля і показати на сторінці   items[0].deliveryDate.endDate
+  ${return_value}=     get_time_with_offset   ${return_value}
   [return]           ${return_value}
 
 # Виконано
@@ -729,7 +718,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Execute Javascript                    location.href = "[name='question.Title']";
   Sleep  5
   Wait Until Page Contains Element    ${locator.questions[0].title}
-  ${return_value}=   Отримати текст із поля і показати на сторінці   questions[0].title
+  ${return_value}=   Get Text   ${locator.questions[0].title}
   [return]           ${return_value}
 
 # Виконано
@@ -758,10 +747,10 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати документ
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Click Element   xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]
+  Click Element   xpath=//*[@data-guid]/a[contains(text(), '${doc_id}')]
   sleep   3
-  ${file_name}=   Get Text    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]
-  ${url}=   Get Element Attribute    xpath=//*[@name='document.Title']/a[contains(text(), '${doc_id}')]@href
+  ${file_name}=   Get Text    xpath=//*[@data-guid]/a[contains(text(), '${doc_id}')]
+  ${url}=   Get Element Attribute    xpath=//*[@data-guid]/a[contains(text(), '${doc_id}')]@href
   download_document_from_url   ${url}   ${file_name}   ${OUTPUT_DIR}
   [return]  ${file_name}
 
@@ -789,13 +778,11 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Подати цінову пропозицію
   [Arguments]   ${username}    ${tender_id}   ${test_bid_data}   ${lots_ids}=${None}   ${features_ids}=${None}
-  [Documentation]
-  ...    ${ARGUMENTS[0]} ==  username
-  ...    ${ARGUMENTS[1]} ==  tenderId
-  ...    ${ARGUMENTS[2]} ==  ${test_bid_data}
   ${amount}=    Get From Dictionary     ${test_bid_data.data.lotValues[0].value}         amount
-  # kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
-  Wait Until Page Contains Element          ${bid_take_part_button}
+  kapitalist.Пошук тендера по ідентифікатору    ${username}  ${tender_id}
+  Wait Until Page Contains Element          ${bids.tab}
+  Click Element                             ${bids.tab}
+  Sleep   5
   Click Element                             ${bid_take_part_button}
   Sleep   5
   Wait Until Page Contains Element          ${bid_select_lot_checkbox}
@@ -808,9 +795,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Скасувати цінову пропозицію
   [Arguments]    ${user_name}   ${tender_id}
-  [Documentation]
-  ...    ${ARGUMENTS[0]} ==  username
-  ...    ${ARGUMENTS[1]} ==  tenderId
 .. Log Many
   kapitalist.Пошук тендера по ідентифікатору  ${user_name}  ${tender_id}
   Wait Until Page Contains Element   ${bids.tab}
@@ -843,20 +827,17 @@ ${cancelation.submit.button}     css=[type="submit"]
   Click Element                               ${edit.bid.button}
   ${fieldvalue}=   Convert to Number         ${fieldvalue}
   Sleep   5
-  Execute Javascript                        $('input[id="Value_Amount"]').data("kendoNumericTextBox").value(${fieldvalue});
+  Execute Javascript                        $('input[id*="Value_Amount"]').data("kendoNumericTextBox").value(${fieldvalue});
   Sleep  5
   Click Element  xpath=//*[@type="submit"]
 
 Завантажити документ в ставку
   [Arguments]   ${username}   ${path}   ${tender_uaid}   ${doc_type}=documents
-  [Documentation]
-  ...    ${ARGUMENTS[1]} ==  file
-  ...    ${ARGUMENTS[2]} ==  tenderId
   kapitalist.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
   Sleep  5
-  Wait Until Page Contains Element          xpath=//a[contains(@onclick, '/documents/_add')]
+  Wait Until Page Contains Element          xpath=//a[contains(@onclick, 'documents/_add')]
   Click Element     xpath=//a[contains(@onclick, '/documents/_add')]
   Sleep   3
   Wait Until Page Contains Element          id=Document
@@ -867,10 +848,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Змінити документ в ставці
   [Arguments]   ${username}   ${tender_uaid}   ${path}   ${bidId}
-  [Documentation]
-  ...    ${ARGUMENTS[0]} ==  username
-  ...    ${ARGUMENTS[1]} ==  file
-  ...    ${ARGUMENTS[2]} ==  bidId
   kapitalist.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
