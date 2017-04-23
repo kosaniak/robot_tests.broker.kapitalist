@@ -227,7 +227,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ${lot_value_amount}    Get From Dictionary   ${lots[0].value}                       amount
   ${lot_step_rate}       Get From Dictionary   ${lots[0].minimalStep}                 amount
 
-  Selenium2Library.Switch Browser     ${username}
+  Switch Browser     ${username}
   Wait Until Page Contains Element    ${createTenderButton}                               10
   Click Element                       ${createTenderButton}
   Sleep  3
@@ -515,7 +515,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   ...      ${ARGUMENTS[0]} =  username
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
   ...      ${ARGUMENTS[2]} =  ${field_value}
-  Selenium2Library.Switch Browser    ${username}
+  Switch Browser    ${username}
   kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaId}
   Sleep   2
   Click Element   xpath=//*[@id="general"]/div/fieldset[1]/div[2]/a[1]
@@ -895,3 +895,4 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep   5
   ${result}=    Get Element Attribute  xpath=//a[contains(@href, 'auction-sandbox.openprocurement.org/tenders/')]@href
   [return]   ${result}
+
