@@ -129,7 +129,7 @@ ${answer.text.field}             id=Answer
 ${answer.save.button}            css=[type="submit"]
 
 #Подання пропозиції
-${bid_take_part_button}              xpath=//a[contains(@onclick, '/bids/_add')]
+${bid_take_part_button}              xpath=//div[@id='bids']//a[contains(@onclick, '/bids/_add')]
 ${bid_select_lot_checkbox}           xpath=//*[@class="cr"]
 ${bid_lot_value}                     css=input[id*="Value_Amount"]
 ${bid_add_document}                  id=files
@@ -783,6 +783,7 @@ ${cancelation.submit.button}     css=[type="submit"]
   Wait Until Page Contains Element          ${bids.tab}
   Click Element                             ${bids.tab}
   Sleep   5
+  Wait Until Page Contains Element          ${bid_take_part_button}
   Click Element                             ${bid_take_part_button}
   Sleep   5
   Wait Until Page Contains Element          ${bid_select_lot_checkbox}
