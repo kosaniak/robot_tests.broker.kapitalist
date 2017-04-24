@@ -715,9 +715,10 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 # Виконано
 Отримати інформацію про questions[0].title
-  Execute Javascript                    location.href = "[name='question.Title']";
+  Reload Page
+#  Execute Javascript                    location.href = "[name='question.Title']";
   Sleep  5
-  Wait Until Page Contains Element    ${locator.questions[0].title}
+#  Wait Until Page Contains Element    ${locator.questions[0].title}
   ${return_value}=   Get Text   ${locator.questions[0].title}
   [return]           ${return_value}
 
@@ -756,7 +757,8 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 Отримати інформацію із запитання
   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
-  Reload Page
+  kapitalist.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+#  Reload Page
   ${return_value}=  Get Text   ${locator.questions[0].${field_name}}
   [return]           ${return_value}
 
@@ -792,8 +794,10 @@ ${cancelation.submit.button}     css=[type="submit"]
   Execute Javascript                        $('input[id*="Value_Amount"]').data("kendoNumericTextBox").value(${amount});
   Click Element                             ${bid_approve_button}
   sleep   3
-
-
+  ${result}=   Get Text   xpath=//*[@name="lotValue.Value"]
+  ${result}=     ${result.split(' ')[0]}
+#  Should Be Equal   ${amount}     ${result}
+  log to console   ${result}
 Скасувати цінову пропозицію
   [Arguments]    ${user_name}   ${tender_id}
 .. Log Many
@@ -808,7 +812,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 
 #Done
 Отримати інформацію із пропозиції
-  [Arguments]  ${username}  ${tender_uaid}   ${field}
+  [Arguments]  ${username}   ${tender_uaid}   ${field}
   kapitalist.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Wait Until Page Contains Element            ${bids.tab}
   Click Element                               ${bids.tab}
