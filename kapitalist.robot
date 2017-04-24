@@ -256,6 +256,8 @@ ${cancelation.submit.button}     css=[type="submit"]
   Input text                            ${lotHeader}                      ${lot_title}
   Input text                            ${lotDescription}                 ${lot_desc}
   Sleep  3
+  ${lot_value_amount}=   to castom string     ${lot_value_amount}
+  ${lot_step_rate}=      to castom string     ${lot_step_rate}
   Execute Javascript                    $('#Value_Amount').data("kendoNumericTextBox").value(${lot_value_amount});
   Execute Javascript                    $(${lotGuaranteeAmount}).data("kendoNumericTextBox").value(${lot_value_amount});
   Execute Javascript                    $(${lotMinimalStepAmount}).data("kendoNumericTextBox").value(${lot_step_rate});
@@ -498,8 +500,6 @@ ${cancelation.submit.button}     css=[type="submit"]
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
   ${return_value}=   Convert to Number   ${return_value.split(' ')[0].replace(',', '.')}
-#  ${return_value}=      ${return_value.split(' ')[0].replace(',', '.')}
-  # ${return_value}=   string_to_float   ${return_value}
   [return]           ${return_value}
 
 # Виконано
