@@ -794,10 +794,11 @@ ${cancelation.submit.button}     css=[type="submit"]
   Execute Javascript                        $('input[id*="Value_Amount"]').data("kendoNumericTextBox").value(${amount});
   Click Element                             ${bid_approve_button}
   sleep   3
+  Wait Until Page Contains Element   xpath=//*[@name="lotValue.Value"]
   ${result}=   Get Text   xpath=//*[@name="lotValue.Value"]
-  ${result}=     ${result.split(' ')[0]}
-#  Should Be Equal   ${amount}     ${result}
   log to console   ${result}
+
+
 Скасувати цінову пропозицію
   [Arguments]    ${user_name}   ${tender_id}
 .. Log Many
