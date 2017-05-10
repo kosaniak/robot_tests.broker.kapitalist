@@ -63,7 +63,7 @@ ${loginPasswordField}            id=Password
 ${submitButton}                  xpath=//*[@type="submit"]
 ${createTenderButton}            xpath=//*[@id="mainControl"]/a[2]
 #Тип тендеру - Допорогові закупівлі
-${typeOfAdvertisementLink}       xpath=//* [text()="Допорогові закупівлі"]
+${typeOfAdvertisementLink}       xpath=//a[contains(@href, '/draft/belowThreshold/createTender')]
 ${tender.title}                  id=Title
 ${edit.description}                   id=Description
 ${turnOnPdvCheckBox}             id=Value_VATIncluded
