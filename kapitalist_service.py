@@ -68,3 +68,7 @@ def get_time_with_offset(date):
 
 def download_document_from_url(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
+
+
+def to_castom_string(string):
+    return format(string, '.2f')
