@@ -91,7 +91,7 @@ ${CpvCodeList}                   xpath=//*[@id='accordionCPV']/div/div/h4/a
 ${searchCPV}                     id=Classification_search
 ${addCpvCode}                    id=03121100-6_anchor
 ${unitCode}                      xpath=//*[@id="UnitId_chosen"]/a/span    #xpath=//*[@class="chosen-single"]/span
-${unitName}                      xpath=//*[@class="chosen-search"]/input
+${unitName}                      //li[contains(@class, 'active-result') and contains(text(), 'блок')]
 ${unit.active.result}            xpath=//*[@calss="active-result"]
 ${unitQuantity}                  id=Quantity
 ${deliveryDateStartDateLocal}    id=DeliveryDate_StartDate_Local
@@ -283,8 +283,8 @@ ${cancelation.submit.button}     css=[type="submit"]
 #  ...   Input Text   ${item.additional.classification}      ${additionalClassifications_description}
   ...   Input Text   ${item.additional.classification}      ДКПП
   Execute Javascript                    $('#UnitId_chosen>a>span').trigger({type: 'mousedown', which: 1});
-  Input Text                            ${unitName}                       ${unit}
-  Press Key                             ${unitName}                       \\\13
+  Click Element                         //li[contains(@class, 'active-result') and contains(text(), '${unit}')]
+#  Press Key                             ${unitName}                       \\\13
   Input Text                            ${unitQuantity}                   ${quantity}
   Input Text                            ${deliveryDateStartDateLocal}     ${deliveryDate}
   Input Text                            ${deliveryDateEndDateLocal}       ${deliveryDate}
