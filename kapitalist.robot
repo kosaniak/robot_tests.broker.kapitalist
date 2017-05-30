@@ -43,7 +43,7 @@ ${locator.items[0].deliveryAddress.streetAddress}               css=[name="item.
 ${locator.items[0].classification.scheme}                       xpath=//*[contains(text(), "CPV")]
 ${locator.items[0].classification.id}                           css=[name="item.Classification"]
 ${locator.items[0].classification.description}                  css=[name="item.Classification"]
-${locator.items[0].unit.name}                                   css=[name="item.Quantity"]
+${locator.items[0].unit.name}                                   css=[name="item.Unit.Name"]
 ${locator.items[0].unit.code}                                   css=[name="item.Unit.Code"]
 ${locator.items[0].quantity}                                    css=[name="item.Quantity"]
 ${locator.questions[0].title}                                   xpath=//*[@name="question.Title"]
@@ -545,7 +545,7 @@ ${cancelation.submit.button}     css=[type="submit"]
 # Виконано
 Отримати інформацію про items[${index}].unit.name
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[${index}].unit.name
-  [return]           ${return_value.split(' ')[1]}
+  [return]           ${return_value}
 
 # Done
 Отримати інформацію про items[${index}].description
@@ -901,4 +901,3 @@ ${cancelation.submit.button}     css=[type="submit"]
   Sleep   5
   ${result}=    Get Element Attribute  xpath=//a[contains(@href, 'auction-sandbox.openprocurement.org/tenders/')]@href
   [return]   ${result}
-
